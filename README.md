@@ -34,7 +34,7 @@ No build step needed — `dist/` is pre-built and included in the repo.
 ### 5. Set webhook URL in Sarvam
 Go to **apps.sarvam.ai → Deploy → your deployment → Webhook config**:
 ```
-https://darkslategray-giraffe-469443.hostingersite.com/api/webhook/call
+https://lightsteelblue-ram-997091.hostingersite.com/api/webhook/call
 ```
 
 ## Local development
