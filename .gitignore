@@ -1,6 +1,6 @@
 node_modules
-dist
 .env
 *.local
 webhook-server/calls.json
 webhook-server/node_modules
+webhook-server/.env
