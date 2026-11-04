@@ -10,6 +10,9 @@ import { GroupByPage } from './pages/GroupByPage'
 import { BoardsPage } from './pages/BoardsPage'
 import { SettingsPage } from './pages/SettingsPage'
 import { WebhookCallsPage } from './pages/WebhookCallsPage'
+import { WhatsAppAgentPage } from './pages/WhatsAppAgentPage'
+import { WhatsAppConversationsPage } from './pages/WhatsAppConversationsPage'
+import { WhatsAppLeadsPage } from './pages/WhatsAppLeadsPage'
 
 export default function App() {
   return (
@@ -24,6 +27,9 @@ export default function App() {
         <Route path="group-by" element={<GroupByPage />} />
         <Route path="boards" element={<BoardsPage />} />
         <Route path="settings" element={<SettingsPage />} />
+        <Route path="whatsapp" element={<WhatsAppAgentPage />} />
+        <Route path="whatsapp/conversations" element={<WhatsAppConversationsPage />} />
+        <Route path="whatsapp/leads" element={<WhatsAppLeadsPage />} />
       </Route>
     </Routes>
   )
