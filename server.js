@@ -196,8 +196,9 @@ app.use(express.json())
 // ─────────────────────────────────────────────────────────────────────────────
 async function sarvamFetchProxy(req, res, targetBase) {
   try {
-    // Build target URL — preserve the raw path exactly as-is (keeps %2F encoded)
-    const rawPath = req.url  // e.g. /interactions?start_datetime=...
+    // Use req.originalUrl to preserve encoded characters like %2F in recording IDs.
+    // Express decodes req.url but originalUrl keeps the raw encoded form.
+    const rawPath = req.originalUrl.replace(/^\/api\/(sarvam|campaigns|boards|api-proxy)/, '')
     const targetUrl = `${targetBase}${rawPath}`
 
     console.log(`[proxy] ${req.method} ${targetUrl.slice(0, 100)}`)
@@ -240,30 +241,13 @@ async function sarvamFetchProxy(req, res, targetBase) {
 }
 
 // Mount proxy routes
-const SARVAM_ANALYTICS = `https://apps.sarvam.ai/api/analytics/v1`
+const SARVAM_ANALYTICS  = `https://apps.sarvam.ai/api/analytics/v1`
 const SARVAM_SCHEDULING = `https://apps.sarvam.ai/api/scheduling/v1/orgs/${ORG_ID}/workspaces/${WS_ID}`
 
-app.all('/api/sarvam/*', (req, res) => {
-  // Strip /api/sarvam prefix, keep the rest raw
-  req.url = req.url.replace(/^\/api\/sarvam/, '')
-  return sarvamFetchProxy(req, res, SARVAM_ANALYTICS)
-})
-
-app.all('/api/campaigns/*', (req, res) => {
-  req.url = req.url.replace(/^\/api\/campaigns/, '')
-  return sarvamFetchProxy(req, res, SARVAM_SCHEDULING)
-})
-
-app.all('/api/boards/*', (req, res) => {
-  req.url = req.url.replace(/^\/api\/boards/, '')
-  return sarvamFetchProxy(req, res, `${SARVAM_ANALYTICS}/${ORG_ID}/${WS_ID}/boards`)
-})
-
-// Legacy paths — keep for backwards compatibility
-app.all('/api-proxy/*', (req, res) => {
-  req.url = req.url.replace(/^\/api-proxy/, '')
-  return sarvamFetchProxy(req, res, SARVAM_ANALYTICS)
-})
+app.all('/api/sarvam/*',    (req, res) => sarvamFetchProxy(req, res, SARVAM_ANALYTICS))
+app.all('/api/campaigns/*', (req, res) => sarvamFetchProxy(req, res, SARVAM_SCHEDULING))
+app.all('/api/boards/*',    (req, res) => sarvamFetchProxy(req, res, `${SARVAM_ANALYTICS}/${ORG_ID}/${WS_ID}/boards`))
+app.all('/api-proxy/*',     (req, res) => sarvamFetchProxy(req, res, SARVAM_ANALYTICS))
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Health
