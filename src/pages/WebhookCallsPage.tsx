@@ -8,7 +8,6 @@ import {
 import { useWebhookCalls } from '../hooks/useWebhookCalls'
 import { useQueryClient } from '@tanstack/react-query'
 import { WebhookCall, WebhookTranscriptTurn } from '../types'
-import { CONFIG } from '../config'
 
 const PAGE_SIZE = 25
 
@@ -40,9 +39,9 @@ function DispositionBadge({ d }: { d: string | null }) {
 }
 
 // ── Recording player modal ────────────────────────────────────────────────────
-// Fetches recording from Sarvam Analytics API via the server-side proxy.
-// recording_url from the webhook payload is usually null — Sarvam doesn't
-// include it in webhooks. We fetch it using the interaction_id instead.
+// Strategy:
+// 1. If webhook payload has recording_url → use it directly (no auth needed)
+// 2. Otherwise → try analytics API via server proxy
 function RecordingModal({ call, onClose }: { call: WebhookCall; onClose: () => void }) {
   const [blobUrl,   setBlobUrl]   = useState<string | null>(null)
   const [loading,   setLoading]   = useState(true)
@@ -51,26 +50,43 @@ function RecordingModal({ call, onClose }: { call: WebhookCall; onClose: () => v
   const audioRef = useRef<HTMLAudioElement>(null)
 
   useEffect(() => {
-    if (!call.interaction_id) { setLoading(false); setError('No interaction ID'); return }
-    setLoading(true); setError(null)
+    setLoading(true); setError(null); setBlobUrl(null)
 
-    // Encode the "/" in interaction_id as %2F
-    const encodedId = call.interaction_id.replace('/', '%2F')
-    const url = `/api/sarvam/${CONFIG.ORG_ID}/${CONFIG.WORKSPACE_ID}/${CONFIG.APP_ID}/recordings/${encodedId}`
+    async function load() {
+      // Strategy 1: use recording_url from webhook payload directly
+      if (call.recording_url) {
+        try {
+          const res = await fetch(call.recording_url)
+          if (res.ok) {
+            const ct  = res.headers.get('content-type') || 'audio/wav'
+            const buf = await res.arrayBuffer()
+            setBlobUrl(URL.createObjectURL(new Blob([buf], { type: ct })))
+            return
+          }
+        } catch (_) {}
+        // If direct URL failed, fall through to analytics API
+      }
 
-    fetch(url)
-      .then(async res => {
-        if (res.status === 404) throw new Error('NO_RECORDING')
-        if (!res.ok) throw new Error(`HTTP ${res.status}`)
+      // Strategy 2: fetch via /api/recording?id= (server proxy to Sarvam analytics)
+      if (!call.interaction_id) { setError('NO_RECORDING'); return }
+      try {
+        const res = await fetch(`/api/recording?id=${encodeURIComponent(call.interaction_id)}`)
+        if (res.status === 404) { setError('NO_RECORDING'); return }
+        if (!res.ok) {
+          let detail = `HTTP_${res.status}`
+          try { const j = await res.json(); detail = j.error || j.detail || detail } catch (_) {}
+          setError(detail); return
+        }
         const ct  = res.headers.get('content-type') || 'audio/wav'
         const buf = await res.arrayBuffer()
         setBlobUrl(URL.createObjectURL(new Blob([buf], { type: ct })))
-      })
-      .catch(e => setError(e.message))
-      .finally(() => setLoading(false))
+      } catch (e) {
+        setError('NO_RECORDING')
+      }
+    }
 
-    return () => { if (blobUrl) URL.revokeObjectURL(blobUrl) }
-  }, [call.interaction_id])
+    load().finally(() => setLoading(false))
+  }, [call.interaction_id, call.recording_url])
 
   const toggle = () => {
     if (!audioRef.current) return
