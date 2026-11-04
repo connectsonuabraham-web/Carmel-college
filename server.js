@@ -39,9 +39,9 @@ if (fs.existsSync(envFile)) {
   })
 }
 
-const express                           = require('express')
-const { createProxyMiddleware }         = require('http-proxy-middleware')
-const crypto                            = require('crypto')
+const express  = require('express')
+const crypto   = require('crypto')
+// Note: http-proxy-middleware removed — replaced with native fetch proxy below
 
 const app  = express()
 const PORT = Number(process.env.PORT) || 3001
@@ -184,54 +184,86 @@ app.use((req, res, next) => {
 app.use(express.json())
 
 // ─────────────────────────────────────────────────────────────────────────────
-// Sarvam API proxies  (replaces the Vite dev proxy — works in production too)
+// Sarvam API proxy — fetch-based (works on all Node.js hosts)
 //
-// The proxy injects the X-API-Key header server-side so it never appears
-// in the browser's network tab.
+// Routes:
+//   /api/sarvam/*       → https://apps.sarvam.ai/api/analytics/v1/*
+//   /api/campaigns/*    → https://apps.sarvam.ai/api/scheduling/v1/orgs/{org}/workspaces/{ws}/*
+//   /api/boards/*       → https://apps.sarvam.ai/api/analytics/v1/{org}/{ws}/boards/*
 //
-// IMPORTANT: pathRewrite uses literal strings — %2F in recording IDs is
-// preserved because http-proxy-middleware passes the raw encoded path through.
+// The X-API-Key is injected server-side. %2F in recording IDs is preserved
+// because we use req.url directly without any re-encoding.
 // ─────────────────────────────────────────────────────────────────────────────
-const sarvamProxy = (pathRewrite, extra = '') =>
-  createProxyMiddleware({
-    target:      'https://apps.sarvam.ai',
-    changeOrigin: true,
-    secure:       true,
-    pathRewrite,
-    on: {
-      proxyReq(proxyReq) {
-        const key = SARVAM_API_KEY
-        if (key) {
-          proxyReq.setHeader('X-API-Key', key)
-        } else {
-          console.error('[proxy] WARNING: SARVAM_API_KEY is not set — requests will fail with 401')
-        }
+async function sarvamFetchProxy(req, res, targetBase) {
+  try {
+    // Build target URL — preserve the raw path exactly as-is (keeps %2F encoded)
+    const rawPath = req.url  // e.g. /interactions?start_datetime=...
+    const targetUrl = `${targetBase}${rawPath}`
+
+    console.log(`[proxy] ${req.method} ${targetUrl.slice(0, 100)}`)
+
+    const isRecording = rawPath.includes('/recordings/') || rawPath.includes('/forwarded-recordings/')
+
+    const upstream = await fetch(targetUrl, {
+      method:  req.method,
+      headers: {
+        'X-API-Key':    SARVAM_API_KEY,
+        'Content-Type': 'application/json',
+        'Accept':       isRecording ? 'audio/wav,audio/*,*/*' : 'application/json',
       },
-      proxyRes(proxyRes, req) {
-        if (proxyRes.statusCode === 401) {
-          console.error('[proxy] 401 Unauthorized — check SARVAM_API_KEY env var in Hostinger hPanel')
-        }
-      },
-      error(err, req, res) {
-        console.error('[proxy] error:', err.message)
-        res.status(502).json({ error: 'proxy_error', detail: err.message })
-      },
-    },
-  })
+      body: ['GET', 'HEAD'].includes(req.method) ? undefined : JSON.stringify(req.body),
+    })
 
-// Main analytics (interactions, attempts, transcripts, recordings, traces)
-app.use('/api/sarvam', sarvamProxy({ '^/api/sarvam': '/api/analytics/v1' }))
+    if (upstream.status === 401) {
+      console.error('[proxy] 401 — SARVAM_API_KEY is wrong or not set in Hostinger env vars')
+    }
 
-// Campaigns
-app.use('/api/campaigns', sarvamProxy({ '^/api/campaigns': `/api/scheduling/v1/orgs/${ORG_ID}/workspaces/${WS_ID}` }))
+    // Forward content-type
+    const ct = upstream.headers.get('content-type') || 'application/json'
+    res.setHeader('Content-Type', ct)
+    res.setHeader('Access-Control-Allow-Origin', '*')
 
-// Boards
-app.use('/api/boards', sarvamProxy({ '^/api/boards': `/api/analytics/v1/${ORG_ID}/${WS_ID}/boards` }))
+    // For binary responses (recordings), send as buffer
+    if (isRecording && upstream.ok) {
+      const buf = Buffer.from(await upstream.arrayBuffer())
+      return res.status(upstream.status).send(buf)
+    }
 
-// Legacy proxy paths (kept for backwards compatibility)
-app.use('/api-proxy',       sarvamProxy({ '^/api-proxy':       '/api/analytics/v1' }))
-app.use('/campaigns-proxy', sarvamProxy({ '^/campaigns-proxy': `/api/scheduling/v1/orgs/${ORG_ID}/workspaces/${WS_ID}` }))
-app.use('/boards-proxy',    sarvamProxy({ '^/boards-proxy':    `/api/analytics/v1/${ORG_ID}/${WS_ID}/boards` }))
+    // For JSON responses
+    const text = await upstream.text()
+    res.status(upstream.status).send(text)
+
+  } catch (err) {
+    console.error('[proxy] fetch error:', err.message)
+    res.status(502).json({ error: 'proxy_error', detail: err.message })
+  }
+}
+
+// Mount proxy routes
+const SARVAM_ANALYTICS = `https://apps.sarvam.ai/api/analytics/v1`
+const SARVAM_SCHEDULING = `https://apps.sarvam.ai/api/scheduling/v1/orgs/${ORG_ID}/workspaces/${WS_ID}`
+
+app.all('/api/sarvam/*', (req, res) => {
+  // Strip /api/sarvam prefix, keep the rest raw
+  req.url = req.url.replace(/^\/api\/sarvam/, '')
+  return sarvamFetchProxy(req, res, SARVAM_ANALYTICS)
+})
+
+app.all('/api/campaigns/*', (req, res) => {
+  req.url = req.url.replace(/^\/api\/campaigns/, '')
+  return sarvamFetchProxy(req, res, SARVAM_SCHEDULING)
+})
+
+app.all('/api/boards/*', (req, res) => {
+  req.url = req.url.replace(/^\/api\/boards/, '')
+  return sarvamFetchProxy(req, res, `${SARVAM_ANALYTICS}/${ORG_ID}/${WS_ID}/boards`)
+})
+
+// Legacy paths — keep for backwards compatibility
+app.all('/api-proxy/*', (req, res) => {
+  req.url = req.url.replace(/^\/api-proxy/, '')
+  return sarvamFetchProxy(req, res, SARVAM_ANALYTICS)
+})
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Health
