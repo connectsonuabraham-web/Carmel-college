@@ -9,3 +9,5 @@ vercel.json
 Procfile
 app.js
 .htaccess
+
+.agents/

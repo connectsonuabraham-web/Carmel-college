@@ -1,0 +1,36 @@
+{
+  "id": "FEAT-001",
+  "type": "feat",
+  "description": "Backend + data layer: add SetSmart config, proxy, TypeScript types, axios client, API functions, and React Query hooks. This is the foundation that FEAT-002 depends on. Does NOT touch any existing Sarvam code.",
+  "status": "pending",
+  "steps": [
+    "1. Add SETSMART_CONFIG to src/config.ts — append after the existing CONFIG export without changing it:\n   export const SETSMART_CONFIG = { BASE_URL: 'https://setsmart.io', API_KEY: '8444ca5e-654b-4a10-913f-4fc6485c2d7c', CLIENT_ID: 'sonuabraham0' } as const",
+
+    "2. Add two lines to .env (append, do not remove existing lines):\n   VITE_SETSMART_API_KEY=8444ca5e-654b-4a10-913f-4fc6485c2d7c\n   VITE_SETSMART_CLIENT_ID=sonuabraham0",
+
+    "3. Add the SetSmart proxy block to server.js — insert it AFTER the existing `app.all('/api-proxy/*', ...)` line and BEFORE the `app.get('/api/health', ...)` line. Exact block:\n   app.all('/api/setsmart/*', async (req, res) => {\n     const path = req.originalUrl.replace(/^\\/api\\/setsmart/, '');\n     const sep = path.includes('?') ? '&' : '?';\n     const url = `https://setsmart.io/api${path}${sep}clientId=sonuabraham0`;\n     try {\n       const upstream = await fetch(url, {\n         method: req.method,\n         headers: { 'x-api-key': '8444ca5e-654b-4a10-913f-4fc6485c2d7c', 'Content-Type': 'application/json' },\n         body: ['GET','HEAD'].includes(req.method) ? undefined : JSON.stringify(req.body),\n       });\n       res.setHeader('Content-Type', 'application/json');\n       res.setHeader('Access-Control-Allow-Origin', '*');\n       res.status(upstream.status).send(await upstream.text());\n     } catch(e) { res.status(502).json({ error: e.message }); }\n   });\n   NOTE: The existing `app.all('/api/sarvam/*', ...)` route already occupies that prefix — the new route uses '/api/setsmart/*' which is a different prefix, so there is no conflict.",
+
+    "4. Create src/types/setsmart.ts with these exact exports:\n   - SetSmartLead interface: id, name, phone, status ('Qualified'|'Booked'|'Open'|'Not Interested'|'New'|string), lastMessage?, lastActivity?, aiEnabled?, tags?, notes?, course?, email?\n   - SetSmartConversation interface: id, contactName, phone, lastMessage, lastActivity, status, aiEnabled, unreadCount?\n   - SetSmartUsage interface: totalConversations, aiMessages, humanMessages, qualifiedLeads, bookedSessions, responseRate?",
+
+    "5. Create src/api/setsmartClient.ts — axios instance with baseURL: '/api/setsmart'. No auth header (server adds it). Same retry interceptor pattern as sarvamClient.ts for 429 status.",
+
+    "6. Create src/api/setsmart.ts — import setsmartClient, export these functions using the exact endpoint paths:\n   - fetchLeads(): GET /leads -> Promise<SetSmartLead[]>\n   - fetchConversations(): GET /conversations -> Promise<SetSmartConversation[]>\n   - fetchAnsweredLeads(): GET /answered-leads -> Promise<SetSmartLead[]>\n   - fetchOkCalls(): GET /ok-call -> Promise<SetSmartLead[]>\n   - fetchResume(): GET /resume -> Promise<SetSmartLead[]>\n   - fetchFailedMessages(): GET /failed-messages -> Promise<SetSmartLead[]>\n   - fetchAiOff(): GET /ai-off -> Promise<SetSmartLead[]>\n   - fetchAgencyUsage(): GET /agency/usage -> Promise<SetSmartUsage>\n   Each function uses setsmartClient.get(path) and returns data (handle both array response and {data: [...]} envelope — try data.data ?? data pattern). For fetchAgencyUsage, handle object response similarly.",
+
+    "7. Create src/hooks/useSetSmart.ts — one named export per API function following the useInteractions.ts pattern exactly:\n   - useLeads(): queryKey ['setsmart-leads'], queryFn fetchLeads, refetchInterval 30000, refetchIntervalInBackground true, staleTime 0, gcTime 120000, retry 2\n   - useConversations(): queryKey ['setsmart-conversations'], same options\n   - useAnsweredLeads(): queryKey ['setsmart-answered-leads'], same options\n   - useOkCalls(): queryKey ['setsmart-ok-calls'], same options\n   - useResume(): queryKey ['setsmart-resume'], same options\n   - useFailedMessages(): queryKey ['setsmart-failed-messages'], same options\n   - useAiOff(): queryKey ['setsmart-ai-off'], same options\n   - useAgencyUsage(): queryKey ['setsmart-agency-usage'], same options"
+  ],
+  "acceptance_criteria": [
+    "src/config.ts exports SETSMART_CONFIG without modifying CONFIG or API_BASE_PATH",
+    ".env contains VITE_SETSMART_API_KEY and VITE_SETSMART_CLIENT_ID lines",
+    "server.js has app.all('/api/setsmart/*', ...) proxy block with x-api-key header and clientId appended",
+    "src/types/setsmart.ts exports SetSmartLead, SetSmartConversation, SetSmartUsage interfaces",
+    "src/api/setsmartClient.ts exports setsmartClient axios instance with baseURL '/api/setsmart'",
+    "src/api/setsmart.ts exports all 8 fetch functions with correct endpoint paths",
+    "src/hooks/useSetSmart.ts exports all 8 React Query hooks with refetchInterval: 30000",
+    "npm run build exits 0 after FEAT-001 (only new files added; TypeScript must find no errors)"
+  ],
+  "verification": [
+    "Run: npm run build (from c:\\Users\\LENOVO\\Downloads\\voice agent dashboard) — must exit 0 with no TypeScript errors"
+  ],
+  "blocked_reason": null,
+  "findings": ""
+}

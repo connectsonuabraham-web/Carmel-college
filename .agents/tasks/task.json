@@ -1,0 +1,7 @@
+{
+  "task_id": "task-whatsapp-agent-dashboard",
+  "task_description": "Add a complete WhatsApp Agent section to the existing Carmel College voice agent dashboard. New features: SetSmart API proxy in server.js, types/setsmart.ts, setsmartClient.ts + setsmart.ts API layer, useSetSmart.ts hooks, three new pages (WhatsAppAgentPage, WhatsAppConversationsPage, WhatsAppLeadsPage), sidebar nav update, OverviewPage WhatsApp section + KPIs, and App.tsx routing — all without touching any existing Sarvam functionality.",
+  "status": "pending",
+  "feature_order": ["FEAT-001", "FEAT-002"],
+  "blocked_reason": null
+}
