@@ -6,3 +6,8 @@ export const CONFIG = {
 } as const
 
 export const API_BASE_PATH = `${CONFIG.ORG_ID}/${CONFIG.WORKSPACE_ID}/${CONFIG.APP_ID}`
+
+export const SETSMART_CONFIG = {
+  BASE_URL: '/api/setsmart',
+  CLIENT_ID: 'sonuabraham0',
+} as const

@@ -249,6 +249,28 @@ app.all('/api/campaigns/*', (req, res) => sarvamFetchProxy(req, res, SARVAM_SCHE
 app.all('/api/boards/*',    (req, res) => sarvamFetchProxy(req, res, `${SARVAM_ANALYTICS}/${ORG_ID}/${WS_ID}/boards`))
 app.all('/api-proxy/*',     (req, res) => sarvamFetchProxy(req, res, SARVAM_ANALYTICS))
 
+// SetSmart WhatsApp Agent proxy — /api/setsmart/* → https://setsmart.io/api/*
+app.all('/api/setsmart/*', async (req, res) => {
+  try {
+    const suffix = req.originalUrl.replace(/^\/api\/setsmart/, '')
+    const sep = suffix.includes('?') ? '&' : '?'
+    const targetUrl = `https://setsmart.io/api${suffix}${sep}clientId=sonuabraham0`
+    console.log('[setsmart] ' + req.method + ' ' + targetUrl)
+    const upstream = await fetch(targetUrl, {
+      method: req.method,
+      headers: { 'x-api-key': '8444ca5e-654b-4a10-913f-4fc6485c2d7c', 'Content-Type': 'application/json', 'Accept': 'application/json' },
+      body: ['GET','HEAD'].includes(req.method) ? undefined : JSON.stringify(req.body),
+    })
+    const text = await upstream.text()
+    res.setHeader('Access-Control-Allow-Origin', '*')
+    res.setHeader('Content-Type', 'application/json')
+    res.status(upstream.status).send(text)
+  } catch(e) {
+    console.error('[setsmart] error:', e.message)
+    res.status(502).json({ error: 'setsmart_proxy_error', detail: e.message })
+  }
+})
+
 // ─────────────────────────────────────────────────────────────────────────────
 // Health
 // ─────────────────────────────────────────────────────────────────────────────
