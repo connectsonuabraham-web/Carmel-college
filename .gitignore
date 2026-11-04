@@ -1,6 +1,5 @@
 node_modules
 .env
 *.local
-webhook-server/calls.json
-webhook-server/node_modules
-webhook-server/.env
+webhook-server/
+calls.json
