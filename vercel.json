@@ -1,15 +1,23 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "version": 2,
-  "framework": "vite",
-  "buildCommand": "npm run build",
-  "outputDirectory": "dist",
-  "rewrites": [
-    { "source": "/api/webhook/call",   "destination": "/api/webhook/call" },
-    { "source": "/api/webhook/calls",  "destination": "/api/webhook/calls" },
-    { "source": "/api/health",         "destination": "/api/health" },
-    { "source": "/api/sarvam/(.*)",    "destination": "/api/sarvam/$1" },
-    { "source": "/api/campaigns/(.*)", "destination": "/api/campaigns/$1" },
-    { "source": "/api/boards/(.*)",    "destination": "/api/boards/$1" }
+  "builds": [
+    {
+      "src": "api/**/*.js",
+      "use": "@vercel/node"
+    },
+    {
+      "src": "dist/**",
+      "use": "@vercel/static"
+    }
+  ],
+  "routes": [
+    { "src": "/api/health",                "dest": "/api/health.js" },
+    { "src": "/api/webhook/call",          "dest": "/api/webhook/call.js" },
+    { "src": "/api/webhook/calls",         "dest": "/api/webhook/calls.js" },
+    { "src": "/api/sarvam/(.*)",           "dest": "/api/sarvam/[...path].js" },
+    { "src": "/api/campaigns/(.*)",        "dest": "/api/campaigns/[...path].js" },
+    { "src": "/api/boards/(.*)",           "dest": "/api/boards/[...path].js" },
+    { "src": "/(.*)",                      "dest": "/dist/$1" }
   ]
 }
