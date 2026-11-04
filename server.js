@@ -279,39 +279,41 @@ app.get('/api/debug', (req, res) => {
 // GET /api/recording?id=20261104%2Fabc-uuid
 // → GET https://apps.sarvam.ai/api/analytics/v1/{org}/{ws}/{app}/recordings/{id}
 //   -H "X-API-Key: sk_aestf8eu_..."
-// The interaction_id is passed as-is (keep %2F encoded in the query param)
 // ─────────────────────────────────────────────────────────────────────────────
 app.get('/api/recording', async (req, res) => {
-  const rawId = req.query.id  // e.g. "20261104/abc" or "20261104%2Fabc"
+  const rawId = req.query.id
   if (!rawId) return res.status(400).json({ error: 'missing id parameter' })
 
-  // Build exact URL from the curl command — org/ws/app are hardcoded here
-  const interactionId = String(rawId)  // keep as-is, may have / or %2F
-  const sarvamUrl = `https://apps.sarvam.ai/api/analytics/v1/${ORG_ID}/${WS_ID}/${APP_ID}/recordings/${encodeURIComponent(interactionId)}`
+  const interactionId = String(rawId)
+  // encodeURIComponent encodes / as %2F, : as %3A etc — exact same as curl
+  const encodedId = encodeURIComponent(interactionId)
+  const sarvamUrl = `https://apps.sarvam.ai/api/analytics/v1/${ORG_ID}/${WS_ID}/${APP_ID}/recordings/${encodedId}`
+  const apiKey    = SARVAM_API_KEY
 
-  console.log(`[recording] fetching: ${sarvamUrl}`)
+  console.log(`[recording] GET ${sarvamUrl}`)
+  console.log(`[recording] key: ${apiKey ? apiKey.slice(0,15) + '...' : 'NOT SET'}`)
 
   try {
     const upstream = await fetch(sarvamUrl, {
       method:  'GET',
-      headers: {
-        'X-API-Key': SARVAM_API_KEY,
-        'Accept':    'audio/wav, audio/*, */*',
-      },
+      headers: { 'X-API-Key': apiKey, 'Accept': 'audio/wav, audio/*, */*' },
     })
 
-    console.log(`[recording] status: ${upstream.status}`)
+    console.log(`[recording] Sarvam responded: ${upstream.status}`)
 
     if (upstream.status === 404) return res.status(404).json({ error: 'NO_RECORDING' })
     if (upstream.status === 401) {
-      console.error('[recording] 401 — API key rejected by Sarvam')
-      return res.status(401).json({ error: 'INVALID_API_KEY' })
+      const body = await upstream.text()
+      console.error(`[recording] 401 body: ${body}`)
+      return res.status(401).json({ error: 'INVALID_API_KEY', detail: body })
     }
-    if (!upstream.ok) return res.status(upstream.status).json({ error: `HTTP_${upstream.status}` })
+    if (!upstream.ok) {
+      const body = await upstream.text()
+      return res.status(upstream.status).json({ error: `HTTP_${upstream.status}`, detail: body })
+    }
 
     const ct  = upstream.headers.get('content-type') || 'audio/wav'
     const buf = Buffer.from(await upstream.arrayBuffer())
-
     res.setHeader('Content-Type',   ct)
     res.setHeader('Content-Length', buf.length)
     res.setHeader('Access-Control-Allow-Origin', '*')
@@ -319,6 +321,32 @@ app.get('/api/recording', async (req, res) => {
 
   } catch (err) {
     console.error('[recording] fetch error:', err.message)
+    res.status(502).json({ error: 'fetch_failed', detail: err.message })
+  }
+})
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Transcript endpoint — query param to avoid %2F path decoding issues
+// GET /api/transcript?id=20261104%2Fabc-uuid
+// ─────────────────────────────────────────────────────────────────────────────
+app.get('/api/transcript', async (req, res) => {
+  const rawId = req.query.id
+  if (!rawId) return res.status(400).json({ error: 'missing id parameter' })
+
+  const encodedId = encodeURIComponent(String(rawId))
+  const sarvamUrl = `https://apps.sarvam.ai/api/analytics/v1/${ORG_ID}/${WS_ID}/${APP_ID}/transcripts/${encodedId}`
+
+  console.log(`[transcript] GET ${sarvamUrl}`)
+
+  try {
+    const upstream = await fetch(sarvamUrl, {
+      headers: { 'X-API-Key': SARVAM_API_KEY, 'Accept': 'application/json' },
+    })
+    const text = await upstream.text()
+    res.setHeader('Content-Type', 'application/json')
+    res.setHeader('Access-Control-Allow-Origin', '*')
+    res.status(upstream.status).send(text)
+  } catch (err) {
     res.status(502).json({ error: 'fetch_failed', detail: err.message })
   }
 })

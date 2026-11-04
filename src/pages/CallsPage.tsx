@@ -19,11 +19,16 @@ function webhookToInteraction(wc: WebhookCall): Interaction {
     duration_in_seconds: wc.duration ?? 0,
     end_reason:          wc.call_disposition ?? '',
     ended_by:            '',
-    num_messages:        0,
+    num_messages:        wc.interaction_transcript?.length ?? 0,
     goal_overall_status: wc.call_disposition ?? '',
     user_contact:        wc.user_phone_number ?? '',
     user_contact_masked: wc.user_phone_number ?? '',
-    agent_variables:     wc.final_agent_variables ?? {},
+    // Store everything in agent_variables so TranscriptPanel can access it
+    agent_variables:     {
+      ...(wc.final_agent_variables ?? {}),
+      // Store transcript here so TranscriptPanel can use it as fallback
+      interaction_transcript: wc.interaction_transcript ?? [],
+    },
     started_at:          wc.start_datetime ?? wc.received_at,
     created_at:          wc.received_at,
   }

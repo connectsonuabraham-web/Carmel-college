@@ -384,8 +384,16 @@ export function TranscriptPanel({ interaction, onClose, initialTab }: Props) {
   if (!interaction) return null
 
   const messages = transcript?.messages ?? interaction.original_transcript ?? []
-  const summary = messages.length > 0
-    ? generateCallSummary(messages, {
+
+  // If no Sarvam transcript, try to use webhook transcript stored in agent_variables
+  const webhookTranscript = (interaction.agent_variables as Record<string, unknown>)?.interaction_transcript as Array<{role:string; en_text:string}> | undefined
+  const displayMessages = messages.length > 0
+    ? messages
+    : webhookTranscript
+      ? webhookTranscript.map(t => ({ role: t.role === 'agent' ? 'assistant' : t.role, content: t.en_text ?? '' }))
+      : []
+  const summary = displayMessages.length > 0
+    ? generateCallSummary(displayMessages, {
         goal_overall_status: interaction.goal_overall_status,
         duration_in_seconds: interaction.duration_in_seconds,
         language_name: interaction.language_name,
@@ -535,7 +543,7 @@ export function TranscriptPanel({ interaction, onClose, initialTab }: Props) {
                   </div>
                 )}
                 {!tLoading && !tError && (
-                  <TranscriptView messages={messages} />
+                  <TranscriptView messages={displayMessages} />
                 )}
                 <div ref={bottomRef} />
               </div>
