@@ -1,38 +1,23 @@
 import { CONFIG } from '../config'
 
-const apiKey = import.meta.env.VITE_SARVAM_API_KEY as string
-
 /**
- * Fetch a call recording from Sarvam Analytics API.
+ * Fetch a call recording via the Express proxy.
  *
- * Sarvam API:
- *   GET https://apps.sarvam.ai/api/analytics/v1/{org_id}/{workspace_id}/{app_id}/recordings/{interaction_id}
- *   Header: X-API-Key: <key>
- *   Response: audio/wav binary
+ * The Express server proxies /api-proxy/* → https://apps.sarvam.ai/api/analytics/v1/*
+ * and injects the X-API-Key header server-side, so no key is exposed in the browser.
  *
- * The interaction_id contains a literal "/" (e.g. "20261104/abc-uuid").
- * This "/" MUST be encoded as %2F in the URL path.
- *
- * Problem: Vite's dev proxy (http-proxy) decodes %2F back to "/" before
- * forwarding, which causes Sarvam to see two path segments and return 400/404.
- *
- * Solution: In DEV, we call the Sarvam API directly from the browser using
- * the full URL. CORS is not an issue for recordings because the response
- * is audio/wav — Sarvam sends CORS headers on the analytics endpoints.
- * We always use native fetch (never axios) so %2F is never re-encoded.
+ * The interaction_id contains a "/" (e.g. "20261104/abc-uuid").
+ * We encode it as %2F — Express / http-proxy-middleware preserves it correctly
+ * (unlike the old Vite dev proxy which decoded it back to "/").
  */
 
-function buildDirectUrl(interactionId: string, endpoint: 'recordings' | 'forwarded-recordings'): string {
-  // Always encode "/" as %2F — one path segment, not two
+function buildUrl(interactionId: string, endpoint: 'recordings' | 'forwarded-recordings'): string {
   const encodedId = interactionId.replace('/', '%2F')
-  const base = `${CONFIG.BASE_URL}/${CONFIG.ORG_ID}/${CONFIG.WORKSPACE_ID}/${CONFIG.APP_ID}`
-  return `${base}/${endpoint}/${encodedId}`
+  return `/api-proxy/${CONFIG.ORG_ID}/${CONFIG.WORKSPACE_ID}/${CONFIG.APP_ID}/${endpoint}/${encodedId}`
 }
 
 async function fetchAudioBlob(url: string): Promise<string> {
-  const response = await fetch(url, {
-    headers: { 'X-API-Key': apiKey },
-  })
+  const response = await fetch(url)   // no API key header needed — proxy adds it
 
   if (response.status === 404) throw new Error('NO_RECORDING')
   if (response.status === 401) throw new Error('INVALID_API_KEY')
@@ -44,19 +29,10 @@ async function fetchAudioBlob(url: string): Promise<string> {
   return URL.createObjectURL(blob)
 }
 
-/**
- * Fetch the main call recording.
- * Returns a blob: URL for <audio src={...} />.
- * Throws 'NO_RECORDING' if 404, 'INVALID_API_KEY' if 401.
- */
 export async function fetchRecording(interactionId: string): Promise<string> {
-  // Always go direct to Sarvam — bypasses the Vite proxy %2F decoding issue
-  return fetchAudioBlob(buildDirectUrl(interactionId, 'recordings'))
+  return fetchAudioBlob(buildUrl(interactionId, 'recordings'))
 }
 
-/**
- * Fetch the forwarded-leg recording (Vobiz transfers only).
- */
 export async function fetchForwardedRecording(interactionId: string): Promise<string> {
-  return fetchAudioBlob(buildDirectUrl(interactionId, 'forwarded-recordings'))
+  return fetchAudioBlob(buildUrl(interactionId, 'forwarded-recordings'))
 }

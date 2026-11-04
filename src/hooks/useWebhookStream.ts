@@ -10,7 +10,7 @@
 import { useEffect, useState } from 'react'
 import { useQueryClient } from '@tanstack/react-query'
 
-const WEBHOOK_SERVER = 'https://darkslategray-giraffe-469443.hostingersite.com'
+const WEBHOOK_SERVER = ''  // same-origin — Express serves both the app and the webhook API
 
 export interface WebhookCall {
   source: 'inbound' | 'campaign' | 'outbound'

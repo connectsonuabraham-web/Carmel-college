@@ -1,6 +1,7 @@
 import { WebhookCallsResponse } from '../types'
 
-const WEBHOOK_BASE = 'https://darkslategray-giraffe-469443.hostingersite.com'
+// Same-origin — Express serves both the React app and the webhook API
+const WEBHOOK_BASE = ''
 
 export interface FetchWebhookCallsParams {
   limit?:       number

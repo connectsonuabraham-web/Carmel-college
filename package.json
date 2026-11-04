@@ -1,24 +1,32 @@
 {
-  "name": "sarvam-voice-agent-dashboard",
+  "name": "carmel-college-voice-dashboard",
   "private": true,
-  "version": "0.1.0",
-  "type": "module",
+  "version": "1.0.0",
+  "description": "Carmel College of Nursing — Sarvam Voice Agent Dashboard",
+  "main": "server.js",
   "scripts": {
-    "dev": "vite",
     "build": "tsc && vite build",
-    "preview": "vite preview"
+    "start": "node server.js",
+    "dev:ui": "vite",
+    "dev": "node server.js"
+  },
+  "engines": {
+    "node": ">=18.0.0"
   },
   "dependencies": {
     "@tanstack/react-query": "^5.62.7",
     "axios": "^1.7.9",
     "date-fns": "^4.1.0",
+    "express": "^4.22.3",
+    "http-proxy-middleware": "^3.0.10",
+    "lucide-react": "^0.468.0",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "react-router-dom": "^6.28.0",
-    "recharts": "^2.14.1",
-    "lucide-react": "^0.468.0"
+    "recharts": "^2.14.1"
   },
   "devDependencies": {
+    "@types/express": "^5.0.6",
     "@types/react": "^18.3.14",
     "@types/react-dom": "^18.3.3",
     "@vitejs/plugin-react": "^4.3.4",

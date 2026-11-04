@@ -2,7 +2,7 @@ import React from 'react'
 import { Key, Building2, Webhook, Radio, CheckCircle2, AlertCircle, Copy } from 'lucide-react'
 import { useWebhookStream } from '../hooks/useWebhookStream'
 
-const PUBLIC_DOMAIN = 'https://darkslategray-giraffe-469443.hostingersite.com'
+const PUBLIC_DOMAIN = typeof window !== 'undefined' ? window.location.origin : 'https://your-domain.com'
 
 function CodeBlock({ children }: { children: string }) {
   return (

@@ -1,37 +1,21 @@
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 
-const ORG_ID = '01a02774-5a8e-7417-83b2-bcd5ec5b0a93'
-const WS_ID  = '01a02774-5a93-78e1-88df-42475fe29aa0'
-const APP_ID = 'Conversatio-63a490c9-20af'
+// Vite is now used ONLY for building the React frontend into dist/.
+// All proxying (Sarvam API, webhook routes) is handled by the Express
+// server in server.js — which works in both dev and production.
+//
+// To develop:
+//   npm run build      — builds the React app into dist/
+//   npm start          — starts Express (serves dist/ + all APIs)
+//
+// Or for hot-reload UI dev only:
+//   npm run dev:ui     — Vite HMR on :5173 (no API proxy, just UI)
 
 export default defineConfig({
   plugins: [react()],
-  server: {
-    proxy: {
-      // Main analytics proxy (interactions, attempts, transcripts, recordings, traces)
-      '/api-proxy': {
-        target: 'https://apps.sarvam.ai',
-        changeOrigin: true,
-        // Keep %2F encoded — do NOT decode it before forwarding
-        // This is critical for recording URLs like /recordings/20261104%2Fabc
-        secure: true,
-        rewrite: (path) => path.replace(/^\/api-proxy/, '/api/analytics/v1'),
-      },
-      // Campaigns proxy
-      '/campaigns-proxy': {
-        target: 'https://apps.sarvam.ai',
-        changeOrigin: true,
-        secure: true,
-        rewrite: (path) => path.replace(/^\/campaigns-proxy/, `/api/scheduling/v1/orgs/${ORG_ID}/workspaces/${WS_ID}`),
-      },
-      // Boards proxy
-      '/boards-proxy': {
-        target: 'https://apps.sarvam.ai',
-        changeOrigin: true,
-        secure: true,
-        rewrite: (path) => path.replace(/^\/boards-proxy/, `/api/analytics/v1/${ORG_ID}/${WS_ID}/boards`),
-      },
-    },
+  build: {
+    outDir: 'dist',
+    emptyOutDir: true,
   },
 })
