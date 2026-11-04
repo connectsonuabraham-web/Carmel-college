@@ -1,14 +1,12 @@
 import axios from 'axios'
 import { CONFIG } from '../config'
 
-// All Sarvam API calls go through /api/sarvam/* on the same origin.
-// The Vercel serverless function at api/sarvam/[...path].js proxies to
-// Sarvam and injects the API key server-side.
+// Express server (server.js) proxies /api/sarvam/* → Sarvam analytics API
+// API key is injected server-side — never exposed in the browser
 const baseURL = `/api/sarvam/${CONFIG.ORG_ID}/${CONFIG.WORKSPACE_ID}/${CONFIG.APP_ID}`
 
 export const sarvamClient = axios.create({ baseURL })
 
-// Retry on 429 with Retry-After
 sarvamClient.interceptors.response.use(
   (res) => res,
   async (error) => {

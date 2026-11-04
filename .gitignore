@@ -3,3 +3,6 @@ node_modules
 *.local
 webhook-server/
 calls.json
+api/
+vercel.json
+Procfile

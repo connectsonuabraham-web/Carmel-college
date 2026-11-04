@@ -1,64 +1,67 @@
 # Carmel College of Nursing — Voice Agent Dashboard
 
-A Node.js + Express web application for monitoring Sarvam AI voice agent calls.
-
-## How it works
-
-Single `server.js` entry point that does everything:
-
-- Serves the React dashboard from `dist/` (pre-built, included in repo)
-- Proxies Sarvam API calls server-side (API key never exposed to browser)
-- Receives webhooks from Sarvam after every call
-- Streams live call updates to the dashboard via SSE
+Sarvam AI Voice Agent analytics dashboard. Single Node.js + Express app.
 
 ## Deploy on Hostinger (Node.js App)
 
-1. Upload / pull this repo
-2. In hPanel → Node.js → Create Application
-   - **Entry point:** `server.js`
-   - **Node version:** 18+
-   - **Start command:** `node server.js`
-3. Set environment variables in hPanel:
-   ```
-   PORT=3001
-   SARVAM_API_KEY=sk_aestf8eu_yWovruzA9d6mwtWIBjTMP3Q1
-   WEBHOOK_SECRET=   (optional)
-   ```
-4. Run `npm install` (no build needed — dist/ is pre-built)
-5. Start the app
+### 1. Upload to Hostinger
+- hPanel → Git → connect to `https://github.com/connectsonuabraham-web/Carmel-college`
+- Or upload the zip via File Manager
 
-## Deploy on Vercel
+### 2. Set up Node.js App in hPanel
+- hPanel → Node.js → Create Application
+- **Node.js version:** 18+
+- **Application root:** `/` (or wherever you uploaded)
+- **Application URL:** your domain
+- **Application startup file:** `server.js`
 
-1. Import the GitHub repo
-2. Set environment variables (same as above)
-3. Vercel auto-detects `vercel.json` and deploys as Node.js
+### 3. Set Environment Variables in hPanel
+```
+PORT=3001
+SARVAM_API_KEY=sk_aestf8eu_yWovruzA9d6mwtWIBjTMP3Q1
+WEBHOOK_SECRET=
+```
+
+### 4. Install dependencies & start
+In hPanel terminal or SSH:
+```bash
+npm install
+npm start
+```
+
+No build step needed — `dist/` is pre-built and included in the repo.
+
+### 5. Set webhook URL in Sarvam
+Go to **apps.sarvam.ai → Deploy → your deployment → Webhook config**:
+```
+https://darkslategray-giraffe-469443.hostingersite.com/api/webhook/call
+```
 
 ## Local development
 
 ```bash
 npm install
-npm start          # serves on http://localhost:3001
+npm start        # Express on http://localhost:3001
 ```
 
-To rebuild the React frontend after UI changes:
+Or with hot-reload UI:
 ```bash
-npm run build      # rebuilds dist/
-npm start
-```
+# Terminal 1
+npm start        # Express on :3001
 
-## Webhook URL to paste in Sarvam
-
-```
-https://your-domain.com/webhook/call
+# Terminal 2  
+npm run dev:ui   # Vite HMR on :5173 (proxies /api/* to :3001)
 ```
 
 ## Endpoints
 
-| Method | Path | Description |
-|--------|------|-------------|
-| GET | `/` | React dashboard |
-| POST | `/webhook/call` | Sarvam posts here after every call |
-| GET | `/webhook/calls` | Paginated call list |
-| GET | `/events` | SSE live stream |
-| GET | `/health` | Health check |
-| GET | `/api-proxy/*` | Sarvam analytics API proxy |
+| Route | Description |
+|-------|-------------|
+| `GET /` | React dashboard |
+| `GET /api/health` | Health check |
+| `POST /api/webhook/call` | Sarvam posts here after every call |
+| `GET /api/webhook/calls` | Paginated stored calls |
+| `GET /events` | SSE live stream |
+| `GET /api/sarvam/*` | Sarvam analytics proxy |
+| `GET /api/campaigns/*` | Sarvam campaigns proxy |
+| `GET /api/boards/*` | Sarvam boards proxy |

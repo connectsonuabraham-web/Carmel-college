@@ -1,8 +1,6 @@
 import axios from 'axios'
 import { PaginatedResponse, Campaign } from '../types'
 
-// Routes through /api/campaigns/* → Vercel serverless → Sarvam
-// API key is injected server-side
 const campaignsClient = axios.create({ baseURL: '/api/campaigns' })
 
 campaignsClient.interceptors.response.use(
@@ -19,11 +17,7 @@ campaignsClient.interceptors.response.use(
 
 export interface FetchCampaignsParams {
   campaign_status?: 'scheduled' | 'active' | 'ended' | 'paused' | 'cancelled'
-  limit?: number
-  offset?: number
-  sort_by?: string
-  sort_order?: 'asc' | 'desc'
-  search?: string
+  limit?: number; offset?: number; sort_by?: string; sort_order?: 'asc' | 'desc'; search?: string
 }
 
 export async function fetchCampaigns(params: FetchCampaignsParams = {}): Promise<PaginatedResponse<Campaign>> {

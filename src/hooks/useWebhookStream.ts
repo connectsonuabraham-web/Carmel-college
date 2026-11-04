@@ -1,73 +1,84 @@
 /**
  * useWebhookStream
  * ─────────────────
- * Polls /api/webhook/calls every 10 seconds for new calls and invalidates
- * React Query cache so the dashboard updates immediately.
+ * Connects to the Express SSE endpoint at /events for instant push updates.
+ * When Sarvam posts a new call to the server, the dashboard receives it
+ * immediately via SSE and invalidates React Query cache.
  *
- * SSE is not used because Vercel serverless functions don't support
- * long-lived connections. Polling every 10s is fast enough for a dashboard.
+ * Falls back to polling if SSE fails.
  */
-import { useEffect, useState, useRef } from 'react'
+import { useEffect, useState } from 'react'
 import { useQueryClient } from '@tanstack/react-query'
 
 export interface WebhookCall {
-  interaction_id:   string | null
-  received_at:      string
-  status?:          string
-  duration:         number | null
-  user_phone_number:  string | null
-  agent_phone_number: string | null
+  interaction_id:    string | null
+  received_at:       string
+  duration:          number | null
+  user_phone_number: string | null
   final_agent_variables: Record<string, unknown> | null
   call_summary:      string | null
   call_disposition:  string | null
   start_datetime:    string | null
-  end_datetime:      string | null
 }
 
-export type WebhookStatus = 'connected' | 'disconnected' | 'unavailable'
+export type WebhookStatus = 'connecting' | 'connected' | 'disconnected' | 'unavailable'
 
 export function useWebhookStream() {
   const queryClient  = useQueryClient()
-  const [status, setStatus]           = useState<WebhookStatus>('disconnected')
+  const [status,      setStatus]      = useState<WebhookStatus>('connecting')
   const [recentCalls, setRecentCalls] = useState<WebhookCall[]>([])
-  const [lastCall, setLastCall]       = useState<WebhookCall | null>(null)
-  const lastCountRef = useRef<number>(0)
+  const [lastCall,    setLastCall]    = useState<WebhookCall | null>(null)
 
   useEffect(() => {
+    let es: EventSource | null = null
+    let retryTimer: ReturnType<typeof setTimeout>
     let cancelled = false
 
-    async function poll() {
+    function connect() {
+      if (cancelled) return
+      setStatus('connecting')
+
       try {
-        const res = await fetch('/api/webhook/calls?limit=50')
-        if (!res.ok) throw new Error(`${res.status}`)
-        const data = await res.json()
-        if (cancelled) return
+        es = new EventSource('/events')
 
-        setStatus('connected')
-        const items: WebhookCall[] = data.items ?? []
-        setRecentCalls(items)
+        es.addEventListener('open', () => {
+          if (!cancelled) setStatus('connected')
+        })
 
-        // If there are more calls than last time, invalidate queries
-        if (items.length > lastCountRef.current) {
-          const newest = items[0]
-          if (newest) setLastCall(newest)
-          queryClient.invalidateQueries({ queryKey: ['interactions'] })
-          queryClient.invalidateQueries({ queryKey: ['attempts'] })
-          queryClient.invalidateQueries({ queryKey: ['webhook-calls'] })
-        }
-        lastCountRef.current = items.length
-      } catch {
-        if (!cancelled) setStatus('unavailable')
+        es.addEventListener('history', (e: MessageEvent) => {
+          try {
+            const history: WebhookCall[] = JSON.parse(e.data)
+            setRecentCalls(history.slice(0, 50))
+          } catch (_) {}
+        })
+
+        es.addEventListener('new_call', (e: MessageEvent) => {
+          try {
+            const call: WebhookCall = JSON.parse(e.data)
+            setLastCall(call)
+            setRecentCalls(prev => [call, ...prev].slice(0, 50))
+            queryClient.invalidateQueries({ queryKey: ['interactions'] })
+            queryClient.invalidateQueries({ queryKey: ['attempts'] })
+            queryClient.invalidateQueries({ queryKey: ['webhook-calls'] })
+          } catch (_) {}
+        })
+
+        es.addEventListener('error', () => {
+          if (cancelled) return
+          es?.close()
+          setStatus('disconnected')
+          retryTimer = setTimeout(connect, 5000)
+        })
+      } catch (_) {
+        setStatus('unavailable')
       }
     }
 
-    // Poll immediately, then every 10 seconds
-    poll()
-    const id = setInterval(poll, 10000)
-
+    connect()
     return () => {
       cancelled = true
-      clearInterval(id)
+      clearTimeout(retryTimer)
+      es?.close()
     }
   }, [queryClient])
 
