@@ -3,11 +3,10 @@ node_modules
 *.local
 webhook-server/
 calls.json
-api/
+/api/
 dist/
 vercel.json
 Procfile
 app.js
 .htaccess
-
 .agents/
