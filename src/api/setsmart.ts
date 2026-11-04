@@ -58,7 +58,7 @@ export async function fetchLeads(): Promise<Lead[]> {
 }
 
 export async function fetchConversations(page = 1, limit = 50): Promise<ConversationsResponse> {
-  const data = await setsmartFetch(`/export-conversations&page=${page}&limit=${limit}`)
+  const data = await setsmartFetch(`/export-conversations?page=${page}&limit=${limit}`)
   const d = data as Record<string, unknown>
   return { success: true, total: 0, page: 1, limit: 50, has_more: false, conversations: [], ...d }
 }
