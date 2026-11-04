@@ -1,11 +1,33 @@
 import React, { useState } from 'react'
 import { ChevronDown, ChevronUp, Filter } from 'lucide-react'
 import { useInteractions } from '../hooks/useInteractions'
+import { useWebhookCalls } from '../hooks/useWebhookCalls'
 import { CallsTable } from '../components/CallsTable'
 import { TranscriptPanel } from '../components/TranscriptPanel'
 import { DateRangePicker } from '../components/DateRangePicker'
-import { DateRange, Interaction } from '../types'
+import { DateRange, Interaction, WebhookCall } from '../types'
 import { defaultDateRange } from '../utils/dateUtils'
+
+// Convert webhook call to Interaction shape so it shows in CallsTable
+function webhookToInteraction(wc: WebhookCall): Interaction {
+  return {
+    interaction_id:      wc.interaction_id ?? '',
+    language_name:       '',
+    channel_type:        'voice',
+    channel_direction:   'inbound',
+    connectivity_status: 'connected',
+    duration_in_seconds: wc.duration ?? 0,
+    end_reason:          wc.call_disposition ?? '',
+    ended_by:            '',
+    num_messages:        0,
+    goal_overall_status: wc.call_disposition ?? '',
+    user_contact:        wc.user_phone_number ?? '',
+    user_contact_masked: wc.user_phone_number ?? '',
+    agent_variables:     wc.final_agent_variables ?? {},
+    started_at:          wc.start_datetime ?? wc.received_at,
+    created_at:          wc.received_at,
+  }
+}
 
 type PanelTab = 'overview' | 'transcript' | 'log-analyser'
 
@@ -71,7 +93,16 @@ export function CallsPage() {
   const [advFilters, setAdvFilters] = useState<AdvancedFilter>(defaultFilters)
 
   const { data, isFetching } = useInteractions(dateRange)
-  const allInteractions = data?.items ?? []
+  const { data: webhookData } = useWebhookCalls({ limit: 1000 })
+
+  const sarvamInteractions = data?.items ?? []
+  const webhookInteractions = (webhookData?.items ?? []).map(webhookToInteraction)
+
+  // Use Sarvam API data if available, otherwise fall back to webhook data
+  const allInteractions = sarvamInteractions.length > 0
+    ? sarvamInteractions
+    : webhookInteractions
+
   const interactions = applyAdvancedFilters(allInteractions, advFilters)
 
   function openPanel(interaction: Interaction, tab: PanelTab) {
@@ -95,7 +126,12 @@ export function CallsPage() {
       <div className="flex flex-wrap gap-4 items-start justify-between">
         <div>
           <h1 className="text-2xl font-bold text-gray-900">Call Logs</h1>
-          <p className="text-sm text-gray-500 mt-0.5">{data?.total ?? 0} total interactions · click a row to view transcript, recording &amp; log analyser</p>
+          <p className="text-sm text-gray-500 mt-0.5">
+            {(data?.total ?? webhookData?.total ?? 0)} total interactions · click a row to view transcript, recording &amp; log analyser
+            {sarvamInteractions.length === 0 && webhookInteractions.length > 0 && (
+              <span className="ml-2 text-xs text-green-600 font-medium">⚡ showing live webhook data</span>
+            )}
+          </p>
         </div>
         {isFetching && <span className="text-xs text-green-600 animate-pulse font-medium">Refreshing…</span>}
       </div>

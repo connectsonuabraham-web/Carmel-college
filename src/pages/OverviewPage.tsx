@@ -1,4 +1,5 @@
 import React, { useMemo, useState } from 'react'
+import { useWebhookCalls } from '../hooks/useWebhookCalls'
 import { useInteractions } from '../hooks/useInteractions'
 import { useAttempts } from '../hooks/useAttempts'
 import { StatCard } from '../components/StatCard'
@@ -6,7 +7,7 @@ import { DateRangePicker } from '../components/DateRangePicker'
 import { CallsPerDayChart } from '../components/charts/CallsPerDayChart'
 import { EndReasonChart } from '../components/charts/EndReasonChart'
 import { GoalStatusChart } from '../components/charts/GoalStatusChart'
-import { DateRange } from '../types'
+import { DateRange, Interaction, WebhookCall } from '../types'
 import { defaultDateRange, formatDuration, formatDateShort } from '../utils/dateUtils'
 import { format, eachDayOfInterval } from 'date-fns'
 import {
@@ -16,121 +17,159 @@ import {
 
 const OUTCOME_COLORS = ['#4CAF50', '#ef4444', '#f59e0b', '#6366f1', '#94a3b8']
 
+// Convert webhook call to Interaction shape for unified display
+function webhookToInteraction(wc: WebhookCall): Interaction {
+  return {
+    interaction_id:     wc.interaction_id ?? '',
+    language_name:      '',
+    channel_type:       'voice',
+    channel_direction:  'inbound',
+    connectivity_status: 'connected',
+    duration_in_seconds: wc.duration ?? 0,
+    end_reason:         wc.call_disposition ?? '',
+    ended_by:           '',
+    num_messages:       0,
+    goal_overall_status: wc.call_disposition === 'enrolled' || wc.call_disposition === 'interested' ? 'success' : wc.call_disposition ?? '',
+    user_contact:       wc.user_phone_number ?? '',
+    user_contact_masked: wc.user_phone_number ?? '',
+    agent_variables:    wc.final_agent_variables ?? {},
+    started_at:         wc.start_datetime ?? wc.received_at,
+    created_at:         wc.received_at,
+  }
+}
+
 export function OverviewPage() {
   const [dateRange, setDateRange] = useState<DateRange>(defaultDateRange)
 
+  // Primary: webhook calls (always available, near real-time)
+  const { data: webhookData, isFetching: wFetching } = useWebhookCalls({ limit: 1000 })
+  // Supplemental: Sarvam API (may fail if proxy broken, that's OK)
   const { data: interactionsData, isFetching: iFetching } = useInteractions(dateRange)
   const { data: attemptsData, isFetching: aFetching } = useAttempts(dateRange)
 
-  const interactions = interactionsData?.items ?? []
+  // Merge: start with webhook calls, supplement with Sarvam if available
+  const webhookCalls = webhookData?.items ?? []
+  const sarvamInteractions = interactionsData?.items ?? []
+
+  // Use Sarvam data if available (proxy working), otherwise use webhook data
+  const interactions: Interaction[] = sarvamInteractions.length > 0
+    ? sarvamInteractions
+    : webhookCalls.map(webhookToInteraction)
+
   const attempts = attemptsData?.items ?? []
 
   const stats = useMemo(() => {
-    const totalInteractions = interactionsData?.total ?? interactions.length
+    const totalInteractions = sarvamInteractions.length > 0
+      ? (interactionsData?.total ?? sarvamInteractions.length)
+      : webhookCalls.length
+
     const totalAttempts = attemptsData?.total ?? attempts.length
-    const connectedAttempts = attempts.filter((a) => a.connectivity_status === 'connected').length
-    const connectionRate =
-      totalAttempts > 0 ? ((connectedAttempts / totalAttempts) * 100).toFixed(1) : '0'
-    const avgDuration =
-      interactions.length > 0
-        ? Math.round(
-            interactions.reduce((s, i) => s + (i.duration_in_seconds ?? 0), 0) /
-              interactions.length
-          )
-        : 0
-    const successGoals = interactions.filter(
-      (i) => i.goal_overall_status === 'success' || i.goal_overall_status === 'completed'
+
+    const connectedAttempts = attempts.filter(a => a.connectivity_status === 'connected').length
+    const connectionRate = totalAttempts > 0
+      ? ((connectedAttempts / totalAttempts) * 100).toFixed(1)
+      : webhookCalls.length > 0 ? '100' : '0'  // webhook calls are always connected
+
+    const avgDuration = interactions.length > 0
+      ? Math.round(interactions.reduce((s, i) => s + (i.duration_in_seconds ?? 0), 0) / interactions.length)
+      : 0
+
+    const successGoals = interactions.filter(i =>
+      i.goal_overall_status === 'success' ||
+      i.goal_overall_status === 'completed' ||
+      i.goal_overall_status === 'enrolled' ||
+      i.goal_overall_status === 'interested' ||
+      i.goal_overall_status === 'query_resolved'
     ).length
-    const successRate =
-      interactions.length > 0
-        ? ((successGoals / interactions.length) * 100).toFixed(1)
-        : '0'
+    const successRate = interactions.length > 0
+      ? ((successGoals / interactions.length) * 100).toFixed(1)
+      : '0'
+
     const today = format(new Date(), 'yyyy-MM-dd')
-    const callsToday = interactions.filter((i) => {
+    const callsToday = interactions.filter(i => {
       const d = i.started_at ?? i.created_at ?? ''
       return d.startsWith(today)
     }).length
 
-    const avgTurns =
-      interactions.length > 0
-        ? Math.round(
-            interactions.reduce((s, i) => s + (i.num_messages ?? 0), 0) / interactions.length
-          )
-        : 0
+    // Also count webhook calls today (in case Sarvam API is not working)
+    const webhookToday = sarvamInteractions.length === 0
+      ? webhookCalls.filter(c => {
+          const d = c.start_datetime ?? c.received_at ?? ''
+          return d.startsWith(today)
+        }).length
+      : callsToday
+
+    const avgTurns = interactions.length > 0
+      ? Math.round(interactions.reduce((s, i) => s + (i.num_messages ?? 0), 0) / interactions.length)
+      : 0
+
+    // Total minutes
+    const totalMinutes = interactions.length > 0
+      ? Math.round(interactions.reduce((s, i) => s + (i.duration_in_seconds ?? 0), 0) / 60)
+      : Math.round(webhookCalls.reduce((s, c) => s + (c.duration ?? 0), 0) / 60)
 
     return {
       totalInteractions,
-      totalAttempts,
+      totalAttempts: totalAttempts || webhookCalls.length,
       connectionRate,
       avgDuration,
       successRate,
-      callsToday,
+      callsToday: webhookToday,
       avgTurns,
+      totalMinutes,
+      usingWebhookData: sarvamInteractions.length === 0,
     }
-  }, [interactions, attempts, interactionsData, attemptsData])
+  }, [interactions, attempts, interactionsData, attemptsData, webhookCalls, sarvamInteractions])
 
+  // Build calls per day using whichever data source has data
   const callsPerDay = useMemo(() => {
     const days = eachDayOfInterval({ start: dateRange.start, end: dateRange.end })
-    return days.map((day) => {
+    return days.map(day => {
       const label = formatDateShort(day)
       const dayStr = format(day, 'yyyy-MM-dd')
-      const count = interactions.filter((i) => {
-        const d = i.started_at ?? i.created_at ?? ''
-        return d.startsWith(dayStr)
-      }).length
-      return { date: label, count }
+
+      const sarvamCount = sarvamInteractions.filter(i =>
+        (i.started_at ?? i.created_at ?? '').startsWith(dayStr)
+      ).length
+
+      const webhookCount = webhookCalls.filter(c =>
+        (c.start_datetime ?? c.received_at ?? '').startsWith(dayStr)
+      ).length
+
+      return { date: label, count: sarvamCount || webhookCount }
     })
-  }, [interactions, dateRange])
+  }, [sarvamInteractions, webhookCalls, dateRange])
+
+  // Disposition breakdown from webhook calls
+  const dispositionData = useMemo(() => {
+    const map: Record<string, number> = {}
+    webhookCalls.forEach(c => {
+      if (c.call_disposition) map[c.call_disposition] = (map[c.call_disposition] ?? 0) + 1
+    })
+    return Object.entries(map).map(([name, value]) => ({ name, value }))
+  }, [webhookCalls])
 
   const endReasonData = useMemo(() => {
     const map: Record<string, number> = {}
-    interactions.forEach((i) => {
-      if (i.end_reason) map[i.end_reason] = (map[i.end_reason] ?? 0) + 1
-    })
+    interactions.forEach(i => { if (i.end_reason) map[i.end_reason] = (map[i.end_reason] ?? 0) + 1 })
+    // Fall back to disposition data from webhooks
+    if (Object.keys(map).length === 0) {
+      webhookCalls.forEach(c => { if (c.call_disposition) map[c.call_disposition] = (map[c.call_disposition] ?? 0) + 1 })
+    }
     return Object.entries(map).map(([name, value]) => ({ name, value }))
-  }, [interactions])
+  }, [interactions, webhookCalls])
 
   const goalStatusData = useMemo(() => {
     const map: Record<string, number> = {}
-    interactions.forEach((i) => {
-      if (i.goal_overall_status)
-        map[i.goal_overall_status] = (map[i.goal_overall_status] ?? 0) + 1
-    })
+    interactions.forEach(i => { if (i.goal_overall_status) map[i.goal_overall_status] = (map[i.goal_overall_status] ?? 0) + 1 })
     return Object.entries(map).map(([name, value]) => ({ name, value }))
   }, [interactions])
 
-  const callOutcomesData = useMemo(() => {
-    const map: Record<string, number> = {
-      Answered: 0,
-      'Not Picked': 0,
-      Busy: 0,
-      Failed: 0,
-      Other: 0,
-    }
-    attempts.forEach((a) => {
-      const s = (a.connectivity_status ?? '').toLowerCase()
-      const f = (a.failure_reason ?? '').toLowerCase()
-      if (s === 'connected') map['Answered']++
-      else if (
-        f.includes('not_picked') ||
-        f.includes('no_answer') ||
-        s === 'not_picked'
-      )
-        map['Not Picked']++
-      else if (f.includes('busy') || s === 'busy') map['Busy']++
-      else if (s === 'failed' || f.includes('failed')) map['Failed']++
-      else map['Other']++
-    })
-    return Object.entries(map)
-      .filter(([, v]) => v > 0)
-      .map(([name, value]) => ({ name, value }))
-  }, [attempts])
-
-  const isFetching = iFetching || aFetching
+  const isFetching = wFetching || iFetching || aFetching
 
   return (
     <div className="space-y-6">
-      {/* Page header */}
+      {/* Header */}
       <div className="flex flex-wrap gap-4 items-start justify-between">
         <div>
           <h1 className="text-2xl font-bold text-gray-900">Dashboard</h1>
@@ -138,6 +177,11 @@ export function OverviewPage() {
         </div>
         <div className="flex items-center gap-3">
           {isFetching && <span className="text-xs text-green-600 animate-pulse font-medium">Refreshing…</span>}
+          {stats.usingWebhookData && webhookCalls.length > 0 && (
+            <span className="text-xs bg-green-100 text-green-700 px-2 py-1 rounded-full font-medium">
+              ⚡ Live data
+            </span>
+          )}
         </div>
       </div>
 
@@ -166,17 +210,10 @@ export function OverviewPage() {
             <ResponsiveContainer width={60} height={40}>
               <PieChart>
                 <Pie
-                  data={[{ v: parseFloat(stats.connectionRate) }, { v: 100 - parseFloat(stats.connectionRate) }]}
-                  dataKey="v"
-                  cx="50%"
-                  cy="50%"
-                  innerRadius={12}
-                  outerRadius={20}
-                  startAngle={90}
-                  endAngle={-270}
+                  data={[{ v: parseFloat(stats.connectionRate) }, { v: Math.max(0, 100 - parseFloat(stats.connectionRate)) }]}
+                  dataKey="v" cx="50%" cy="50%" innerRadius={12} outerRadius={20} startAngle={90} endAngle={-270}
                 >
-                  <Cell fill="#4CAF50" />
-                  <Cell fill="#e8f5e9" />
+                  <Cell fill="#4CAF50" /><Cell fill="#e8f5e9" />
                 </Pie>
               </PieChart>
             </ResponsiveContainer>
@@ -190,17 +227,10 @@ export function OverviewPage() {
             <ResponsiveContainer width={60} height={40}>
               <PieChart>
                 <Pie
-                  data={[{ v: parseFloat(stats.successRate) }, { v: 100 - parseFloat(stats.successRate) }]}
-                  dataKey="v"
-                  cx="50%"
-                  cy="50%"
-                  innerRadius={12}
-                  outerRadius={20}
-                  startAngle={90}
-                  endAngle={-270}
+                  data={[{ v: parseFloat(stats.successRate) }, { v: Math.max(0, 100 - parseFloat(stats.successRate)) }]}
+                  dataKey="v" cx="50%" cy="50%" innerRadius={12} outerRadius={20} startAngle={90} endAngle={-270}
                 >
-                  <Cell fill="#4CAF50" />
-                  <Cell fill="#e8f5e9" />
+                  <Cell fill="#4CAF50" /><Cell fill="#e8f5e9" />
                 </Pie>
               </PieChart>
             </ResponsiveContainer>
@@ -210,13 +240,13 @@ export function OverviewPage() {
 
       {/* KPI row 2 */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-        <StatCard title="Avg Duration" value={formatDuration(stats.avgDuration)} subtitle="per call" />
-        <StatCard title="Calls Today" value={stats.callsToday} subtitle="today" />
-        <StatCard title="Total Attempts" value={stats.totalAttempts} subtitle="all attempts" />
-        <StatCard title="Avg Turns" value={stats.avgTurns} subtitle="per call" />
+        <StatCard title="Avg Duration"    value={formatDuration(stats.avgDuration)} subtitle="per call" />
+        <StatCard title="Calls Today"     value={stats.callsToday}                  subtitle="today" />
+        <StatCard title="Total Attempts"  value={stats.totalAttempts}               subtitle="all attempts" />
+        <StatCard title="Total Minutes"   value={`${stats.totalMinutes}m`}          subtitle="billed" />
       </div>
 
-      {/* Charts row */}
+      {/* Charts */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
         <div className="lg:col-span-2 bg-white rounded-2xl border border-gray-100 shadow-card p-5">
           <div className="flex items-center justify-between mb-4">
@@ -227,17 +257,8 @@ export function OverviewPage() {
         </div>
         <div className="bg-white rounded-2xl border border-gray-100 shadow-card p-5 flex flex-col items-center justify-center">
           <h3 className="text-sm font-semibold text-gray-900 self-start mb-3">Call Performance</h3>
-          <RadialBarChart
-            width={140}
-            height={140}
-            cx={70}
-            cy={70}
-            innerRadius={45}
-            outerRadius={65}
-            data={[{ value: parseFloat(stats.successRate), fill: '#4CAF50' }]}
-            startAngle={180}
-            endAngle={-180}
-          >
+          <RadialBarChart width={140} height={140} cx={70} cy={70} innerRadius={45} outerRadius={65}
+            data={[{ value: parseFloat(stats.successRate), fill: '#4CAF50' }]} startAngle={180} endAngle={-180}>
             <RadialBar dataKey="value" cornerRadius={6} background={{ fill: '#e8f5e9' }} />
           </RadialBarChart>
           <p className="-mt-4 text-3xl font-bold text-gray-900">{stats.successRate}%</p>
@@ -258,51 +279,47 @@ export function OverviewPage() {
       {/* Breakdown charts */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
         <div className="bg-white rounded-2xl border border-gray-100 shadow-card p-5">
-          <h3 className="text-sm font-semibold text-gray-900 mb-3">End Reason</h3>
-          {endReasonData.length > 0 ? <EndReasonChart data={endReasonData} /> : <p className="text-sm text-gray-400 py-8 text-center">No data</p>}
+          <h3 className="text-sm font-semibold text-gray-900 mb-3">End Reason / Disposition</h3>
+          {endReasonData.length > 0 ? <EndReasonChart data={endReasonData} /> : <p className="text-sm text-gray-400 py-8 text-center">No data yet</p>}
         </div>
         <div className="bg-white rounded-2xl border border-gray-100 shadow-card p-5">
           <h3 className="text-sm font-semibold text-gray-900 mb-3">Goal Status</h3>
-          {goalStatusData.length > 0 ? <GoalStatusChart data={goalStatusData} /> : <p className="text-sm text-gray-400 py-8 text-center">No data</p>}
+          {goalStatusData.length > 0 ? <GoalStatusChart data={goalStatusData} /> : (
+            dispositionData.length > 0 ? <GoalStatusChart data={dispositionData} /> :
+            <p className="text-sm text-gray-400 py-8 text-center">No data yet</p>
+          )}
         </div>
         <div className="bg-white rounded-2xl border border-gray-100 shadow-card p-5">
-          <h3 className="text-sm font-semibold text-gray-900 mb-3">Call Outcomes</h3>
-          {callOutcomesData.length > 0 ? (
+          <h3 className="text-sm font-semibold text-gray-900 mb-3">Call Disposition</h3>
+          {dispositionData.length > 0 ? (
             <ResponsiveContainer width="100%" height={200}>
               <PieChart>
-                <Pie data={callOutcomesData} cx="50%" cy="50%" innerRadius={50} outerRadius={80} dataKey="value" paddingAngle={3}>
-                  {callOutcomesData.map((_entry: { name: string; value: number }, index: number) => (
-                    <Cell key={`cell-${index}`} fill={OUTCOME_COLORS[index % OUTCOME_COLORS.length]} />
-                  ))}
+                <Pie data={dispositionData} cx="50%" cy="50%" innerRadius={50} outerRadius={80} dataKey="value" paddingAngle={3}>
+                  {dispositionData.map((_e, i) => <Cell key={i} fill={OUTCOME_COLORS[i % OUTCOME_COLORS.length]} />)}
                 </Pie>
-                <Tooltip formatter={(value: number) => [value, 'Calls']} />
+                <Tooltip formatter={(v: number) => [v, 'Calls']} />
                 <Legend />
               </PieChart>
             </ResponsiveContainer>
-          ) : <p className="text-sm text-gray-400 py-8 text-center">No data</p>}
+          ) : <p className="text-sm text-gray-400 py-8 text-center">No data yet</p>}
         </div>
       </div>
 
       {/* Heatmap */}
       <div className="bg-white rounded-2xl border border-gray-100 shadow-card p-5">
-        <h3 className="text-sm font-semibold text-gray-900 mb-4">Call Activity Heatmap</h3>
+        <h3 className="text-sm font-semibold text-gray-900 mb-4">Call Activity</h3>
         <div className="flex flex-wrap gap-1">
           {callsPerDay.map((d, i) => {
-            const maxCount = Math.max(...callsPerDay.map((x) => x.count), 1)
+            const maxCount = Math.max(...callsPerDay.map(x => x.count), 1)
             const intensity = d.count === 0 ? 0 : Math.ceil((d.count / maxCount) * 6)
-            const bgColors = ['bg-gray-100', 'bg-green-100', 'bg-green-200', 'bg-green-300', 'bg-green-400', 'bg-green-500', 'bg-green-700']
-            return (
-              <div
-                key={i}
-                title={`${d.date}: ${d.count} calls`}
-                className={`w-6 h-6 rounded-sm ${bgColors[intensity]} cursor-pointer hover:ring-2 hover:ring-green-400 hover:ring-offset-1`}
-              />
-            )
+            const bgColors = ['bg-gray-100','bg-green-100','bg-green-200','bg-green-300','bg-green-400','bg-green-500','bg-green-700']
+            return <div key={i} title={`${d.date}: ${d.count} calls`}
+              className={`w-6 h-6 rounded-sm ${bgColors[intensity]} cursor-pointer hover:ring-2 hover:ring-green-400`} />
           })}
         </div>
         <div className="flex items-center gap-2 mt-3">
           <span className="text-xs text-gray-400">Less</span>
-          {['bg-gray-100', 'bg-green-100', 'bg-green-200', 'bg-green-400', 'bg-green-600'].map((c, i) => (
+          {['bg-gray-100','bg-green-100','bg-green-200','bg-green-400','bg-green-600'].map((c,i) => (
             <div key={i} className={`w-4 h-4 rounded-sm ${c}`} />
           ))}
           <span className="text-xs text-gray-400">More</span>

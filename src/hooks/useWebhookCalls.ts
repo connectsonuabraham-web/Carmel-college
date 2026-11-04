@@ -5,9 +5,9 @@ export function useWebhookCalls(params: FetchWebhookCallsParams = {}) {
   return useQuery({
     queryKey: ['webhook-calls', params],
     queryFn:  () => fetchWebhookCalls(params),
-    refetchInterval: 62000,
+    refetchInterval: 10000,        // poll every 10s for near-instant updates
     refetchIntervalInBackground: true,
     staleTime: 0,
-    retry: 1,
+    retry: 2,
   })
 }
