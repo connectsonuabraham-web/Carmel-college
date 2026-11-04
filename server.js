@@ -360,15 +360,16 @@ if (fs.existsSync(distDir)) {
 // ─────────────────────────────────────────────────────────────────────────────
 // Start
 // ─────────────────────────────────────────────────────────────────────────────
-app.listen(PORT, () => {
+app.listen(PORT, '0.0.0.0', () => {
   console.log('')
   console.log('╔══════════════════════════════════════════════════════════╗')
   console.log('║   Carmel College of Nursing — Voice Agent Dashboard      ║')
   console.log('╠══════════════════════════════════════════════════════════╣')
+  console.log(`║   Listening on 0.0.0.0:${PORT}                               ║`)
   console.log(`║   http://localhost:${PORT}                                    ║`)
   console.log('╠══════════════════════════════════════════════════════════╣')
-  console.log('║   Sarvam webhook URL to paste in Sarvam dashboard:       ║')
-  console.log('║   https://<your-domain>/webhook/call                     ║')
+  console.log('║   Health:  /api/health                                   ║')
+  console.log('║   Webhook: /api/webhook/call                             ║')
   console.log('╚══════════════════════════════════════════════════════════╝')
   console.log('')
 })

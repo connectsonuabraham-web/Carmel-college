@@ -5,9 +5,9 @@
   "description": "Carmel College of Nursing — Sarvam Voice Agent Dashboard",
   "main": "server.js",
   "scripts": {
-    "start": "node server.js",
+    "start": "node app.js",
     "build": "tsc && vite build",
-    "dev": "node server.js",
+    "dev": "node app.js",
     "dev:ui": "vite"
   },
   "engines": {
