@@ -1,6 +1,0 @@
-DirectoryIndex disabled
-
-RewriteEngine On
-
-# Proxy everything to the Node.js/Express server
-RewriteRule ^(.*)$ http://localhost:3001/$1 [P,L]

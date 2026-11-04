@@ -4,5 +4,8 @@ node_modules
 webhook-server/
 calls.json
 api/
+dist/
 vercel.json
 Procfile
+app.js
+.htaccess
