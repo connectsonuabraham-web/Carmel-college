@@ -1,17 +1,32 @@
-import { useQuery } from '@tanstack/react-query'
-import {
-  fetchSetSmartLeads, fetchSetSmartAnsweredLeads, fetchSetSmartOkCalls,
-  fetchSetSmartUsage, fetchSetSmartAiOff, fetchSetSmartConversations,
-  fetchSetSmartFailedMessages, fetchSetSmartResume
-} from '../api/setsmart'
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
+import { fetchLeads, fetchConversations, fetchResumeLeads, fetchOkCalls, fetchAiOffLeads, setBooked, setSold, addNotes } from '../api/setsmart'
 
 const OPT = { refetchInterval: 30000, staleTime: 0, retry: 1 }
 
-export const useSetSmartLeads         = () => useQuery({ queryKey: ['ss-leads'],         queryFn: fetchSetSmartLeads,         ...OPT })
-export const useSetSmartAnswered      = () => useQuery({ queryKey: ['ss-answered'],       queryFn: fetchSetSmartAnsweredLeads, ...OPT })
-export const useSetSmartOkCalls       = () => useQuery({ queryKey: ['ss-ok'],            queryFn: fetchSetSmartOkCalls,       ...OPT })
-export const useSetSmartUsage         = () => useQuery({ queryKey: ['ss-usage'],          queryFn: fetchSetSmartUsage,         ...OPT })
-export const useSetSmartAiOff         = () => useQuery({ queryKey: ['ss-aioff'],          queryFn: fetchSetSmartAiOff,         ...OPT })
-export const useSetSmartConversations = () => useQuery({ queryKey: ['ss-conversations'],   queryFn: fetchSetSmartConversations, ...OPT })
-export const useSetSmartFailed        = () => useQuery({ queryKey: ['ss-failed'],         queryFn: fetchSetSmartFailedMessages,...OPT })
-export const useSetSmartResume        = () => useQuery({ queryKey: ['ss-resume'],         queryFn: fetchSetSmartResume,        ...OPT })
+export const useLeads         = () => useQuery({ queryKey: ['ss-leads'],    queryFn: fetchLeads,       ...OPT })
+export const useConversations = (page = 1) => useQuery({ queryKey: ['ss-convs', page], queryFn: () => fetchConversations(page), ...OPT })
+export const useResumeLeads   = () => useQuery({ queryKey: ['ss-resume'],   queryFn: fetchResumeLeads, ...OPT })
+export const useOkCalls       = () => useQuery({ queryKey: ['ss-ok'],       queryFn: fetchOkCalls,     ...OPT })
+export const useAiOffLeads    = () => useQuery({ queryKey: ['ss-aioff'],    queryFn: fetchAiOffLeads,  ...OPT })
+
+export function useSetBooked() {
+  const qc = useQueryClient()
+  return useMutation({ mutationFn: (id: number | string) => setBooked(id), onSuccess: () => qc.invalidateQueries({ queryKey: ['ss-leads'] }) })
+}
+export function useSetSold() {
+  const qc = useQueryClient()
+  return useMutation({ mutationFn: (id: number | string) => setSold(id), onSuccess: () => qc.invalidateQueries({ queryKey: ['ss-leads'] }) })
+}
+export function useAddNotes() {
+  return useMutation({ mutationFn: ({ id, notes }: { id: number | string; notes: string }) => addNotes(id, notes) })
+}
+
+// Legacy aliases — keep for backwards compatibility with existing pages
+export const useSetSmartLeads         = useLeads
+export const useSetSmartConversations = () => { const r = useConversations(); return { ...r, data: r.data?.conversations ?? [] } }
+export const useSetSmartUsage         = () => ({ data: {} as Record<string, unknown>, isFetching: false, isLoading: false, error: null })
+export const useSetSmartAiOff         = useAiOffLeads
+export const useSetSmartOkCalls       = useOkCalls
+export const useSetSmartAnswered      = useResumeLeads
+export const useSetSmartFailed        = () => ({ data: [] as unknown[], isFetching: false, isLoading: false, error: null })
+export const useSetSmartResume        = useResumeLeads

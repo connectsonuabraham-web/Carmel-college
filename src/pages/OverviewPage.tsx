@@ -14,8 +14,8 @@ import {
   RadialBarChart, RadialBar, BarChart, Bar, Cell, ResponsiveContainer,
   PieChart, Pie, Tooltip, Legend
 } from 'recharts'
-import { useSetSmartLeads, useSetSmartUsage } from '../hooks/useSetSmart'
-import type { SetSmartLead, SetSmartUsage } from '../types/setsmart'
+import { useLeads, useConversations, useAiOffLeads } from '../hooks/useSetSmart'
+import type { Lead } from '../api/setsmart'
 import { MessageCircle, BarChart3 } from 'lucide-react'
 
 const OUTCOME_COLORS = ['#4CAF50', '#ef4444', '#f59e0b', '#6366f1', '#94a3b8']
@@ -42,12 +42,17 @@ function webhookToInteraction(wc: WebhookCall): Interaction {
 }
 
 function WhatsAppQuickSection() {
-  const { data: leads = [] } = useSetSmartLeads()
-  const { data: usage = {} } = useSetSmartUsage()
-  const recent = leads.slice(0, 3)
-  const usageTyped = usage as SetSmartUsage
-  const totalConversations = usageTyped.totalConversations ?? usageTyped.conversations ?? 0
-  const qualifiedLeads = usageTyped.qualifiedLeads ?? leads.filter((l: SetSmartLead) => (l.status||l.leadStatus) === 'Qualified').length
+  const { data: leads = [] } = useLeads()
+  const { data: convsResp } = useConversations()
+  const { data: aiOff = [] } = useAiOffLeads()
+
+  const totalConversations = convsResp?.total ?? 0
+  const totalMessages = convsResp?.conversations.reduce((s, c) => s + c.message_count, 0) ?? 0
+  const bookedLeads = leads.filter((l: Lead) => l.ok_call !== 'N/A').length
+  const aiActive = leads.length - aiOff.length
+  const recentConvs = [...(convsResp?.conversations ?? [])]
+    .sort((a, b) => new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime())
+    .slice(0, 3)
 
   if (leads.length === 0 && totalConversations === 0) return null
 
@@ -60,26 +65,25 @@ function WhatsAppQuickSection() {
           </h3>
           <a href="/whatsapp/conversations" className="text-xs text-green-600 hover:underline">View All →</a>
         </div>
-        {recent.length === 0 ? (
+        {recentConvs.length === 0 ? (
           <p className="text-xs text-gray-400 text-center py-4">No WhatsApp conversations yet</p>
         ) : (
           <div className="space-y-3">
-            {recent.map((lead: SetSmartLead, i: number) => {
-              const name = lead.name || lead.firstName || lead.phone || 'Unknown'
-              const status = lead.status || lead.leadStatus || 'New'
-              const statusMap: Record<string,string> = { Qualified:'bg-green-100 text-green-700', Booked:'bg-blue-100 text-blue-700', Open:'bg-gray-100 text-gray-600', New:'bg-yellow-100 text-yellow-700' }
+            {recentConvs.map((conv, i) => {
+              const name = conv.contact.name || 'Unknown'
+              const status = conv.qualification.status || 'New'
+              const statusMap: Record<string, string> = { Qualified: 'bg-green-100 text-green-700', Booked: 'bg-blue-100 text-blue-700', Open: 'bg-gray-100 text-gray-600', New: 'bg-yellow-100 text-yellow-700' }
               return (
                 <div key={i} className="flex items-center gap-3 py-1">
                   <div className="w-8 h-8 rounded-full bg-green-100 flex items-center justify-center flex-shrink-0">
-                    <span className="text-green-700 text-[10px] font-bold">{name.slice(0,2).toUpperCase()}</span>
+                    <span className="text-green-700 text-[10px] font-bold">{name.slice(0, 2).toUpperCase()}</span>
                   </div>
                   <div className="flex-1 min-w-0">
                     <p className="text-xs font-medium text-gray-900 truncate">{name}</p>
-                    <p className="text-[10px] text-gray-400 truncate">{lead.lastMessage || '—'}</p>
+                    <p className="text-[10px] text-gray-400 truncate">{conv.messages[conv.messages.length - 1]?.content ?? '—'}</p>
                   </div>
                   <div className="flex items-center gap-1.5">
-                    <span className={`w-1.5 h-1.5 rounded-full ${lead.aiEnabled!==false?'bg-green-500':'bg-gray-300'}`}/>
-                    <span className={`text-[10px] px-1.5 py-0.5 rounded-full font-medium ${statusMap[status]||'bg-gray-100 text-gray-600'}`}>{status}</span>
+                    <span className={`text-[10px] px-1.5 py-0.5 rounded-full font-medium ${statusMap[status] ?? 'bg-gray-100 text-gray-600'}`}>{status}</span>
                   </div>
                 </div>
               )
@@ -93,9 +97,10 @@ function WhatsAppQuickSection() {
         </h3>
         <div className="grid grid-cols-2 gap-4">
           <div><p className="text-2xl font-bold text-gray-900">{totalConversations}</p><p className="text-xs text-gray-400">Total Conversations</p></div>
-          <div><p className="text-2xl font-bold text-gray-900">{qualifiedLeads}</p><p className="text-xs text-gray-400">Qualified Leads</p></div>
-          <div><p className="text-2xl font-bold text-gray-900">{leads.filter((l:SetSmartLead)=>(l.status||l.leadStatus)==='Booked').length}</p><p className="text-xs text-gray-400">Booked Sessions</p></div>
-          <div><p className="text-2xl font-bold text-gray-900">{leads.filter((l:SetSmartLead)=>l.aiEnabled!==false).length}</p><p className="text-xs text-gray-400">AI Active Chats</p></div>
+          <div><p className="text-2xl font-bold text-gray-900">{leads.length}</p><p className="text-xs text-gray-400">Total Leads</p></div>
+          <div><p className="text-2xl font-bold text-gray-900">{bookedLeads}</p><p className="text-xs text-gray-400">Booked Leads</p></div>
+          <div><p className="text-2xl font-bold text-gray-900">{aiActive}</p><p className="text-xs text-gray-400">AI Active</p></div>
+          <div className="col-span-2"><p className="text-2xl font-bold text-gray-900">{totalMessages}</p><p className="text-xs text-gray-400">Total Messages</p></div>
         </div>
       </div>
     </div>

@@ -13,6 +13,9 @@ import { WebhookCallsPage } from './pages/WebhookCallsPage'
 import { WhatsAppAgentPage } from './pages/WhatsAppAgentPage'
 import { WhatsAppConversationsPage } from './pages/WhatsAppConversationsPage'
 import { WhatsAppLeadsPage } from './pages/WhatsAppLeadsPage'
+import { TemplatesPage } from './pages/TemplatesPage'
+import { CampaignsWAPage } from './pages/CampaignsWAPage'
+import { AIAssistantPage } from './pages/AIAssistantPage'
 
 export default function App() {
   return (
@@ -30,6 +33,9 @@ export default function App() {
         <Route path="whatsapp" element={<WhatsAppAgentPage />} />
         <Route path="whatsapp/conversations" element={<WhatsAppConversationsPage />} />
         <Route path="whatsapp/leads" element={<WhatsAppLeadsPage />} />
+        <Route path="templates" element={<TemplatesPage />} />
+        <Route path="campaigns-wa" element={<CampaignsWAPage />} />
+        <Route path="ai-assistant" element={<AIAssistantPage />} />
       </Route>
     </Routes>
   )
