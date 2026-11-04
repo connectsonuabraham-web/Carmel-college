@@ -289,10 +289,9 @@ async function handleWebhook(req, res, legacyMap) {
 app.post('/api/webhook/call', (req, res) => handleWebhook(req, res, null))
 
 // Legacy paths
-app.post('/webhook/call',     (req, res) => handleWebhook(req, res, null))
-app.post('/api/webhook/inbound',  (req, res) => handleWebhook(req, res, legacyMapper))
-app.post('/api/webhook/campaign', (req, res) => handleWebhook(req, res, legacyMapper))
-app.post('/api/webhook/outbound', (req, res) => handleWebhook(req, res, legacyMapper))
+app.post('/webhook/call', (req, res) => handleWebhook(req, res, null))
+
+const legacyMapper = (body) => ({
   app_id:                 body.app_id            || 'unknown',
   app_version:            body.app_version        || 0,
   deployment_id:          body.deployment_id      || 'unknown',
@@ -309,9 +308,12 @@ app.post('/api/webhook/outbound', (req, res) => handleWebhook(req, res, legacyMa
   metadata:               body.metadata           ?? null,
 })
 
-app.post('/webhook/inbound',  (req, res) => handleWebhook(req, res, legacyMapper))
-app.post('/webhook/campaign', (req, res) => handleWebhook(req, res, legacyMapper))
-app.post('/webhook/outbound', (req, res) => handleWebhook(req, res, legacyMapper))
+app.post('/api/webhook/inbound',  (req, res) => handleWebhook(req, res, legacyMapper))
+app.post('/api/webhook/campaign', (req, res) => handleWebhook(req, res, legacyMapper))
+app.post('/api/webhook/outbound', (req, res) => handleWebhook(req, res, legacyMapper))
+app.post('/webhook/inbound',      (req, res) => handleWebhook(req, res, legacyMapper))
+app.post('/webhook/campaign',     (req, res) => handleWebhook(req, res, legacyMapper))
+app.post('/webhook/outbound',     (req, res) => handleWebhook(req, res, legacyMapper))
 
 // ─────────────────────────────────────────────────────────────────────────────
 // GET /webhook/calls  — paginated call list for the dashboard
