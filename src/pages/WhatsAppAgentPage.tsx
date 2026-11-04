@@ -43,12 +43,12 @@ export function WhatsAppAgentPage() {
   const [aiActive, setAiActive] = useState(true)
   const [activeTab, setActiveTab] = useState<'overview'|'assistant'|'knowledge'|'followups'|'templates'|'settings'>('overview')
 
-  const totalConversations = (usage.totalConversations || usage.conversations || leads.length) as number
-  const aiMessages         = (usage.aiMessages || Math.round(totalConversations * 2.1)) as number
-  const humanMessages      = (usage.humanMessages || Math.round(totalConversations * 0.25)) as number
-  const qualifiedLeads     = (usage.qualifiedLeads || leads.filter((l: SetSmartLead) => getStatus(l) === 'Qualified').length) as number
-  const bookedSessions     = (usage.bookedSessions || leads.filter((l: SetSmartLead) => getStatus(l) === 'Booked').length) as number
-  const responseRate       = totalConversations > 0 ? Math.round((aiMessages / (aiMessages + humanMessages + 1)) * 100) : 94
+  const totalConversations = (usage.totalConversations ?? usage.conversations ?? 0) as number
+  const aiMessages         = (usage.aiMessages ?? 0) as number
+  const humanMessages      = (usage.humanMessages ?? 0) as number
+  const qualifiedLeads     = (usage.qualifiedLeads ?? leads.filter((l: SetSmartLead) => getStatus(l) === 'Qualified').length) as number
+  const bookedSessions     = (usage.bookedSessions ?? leads.filter((l: SetSmartLead) => getStatus(l) === 'Booked').length) as number
+  const responseRate       = (aiMessages + humanMessages) > 0 ? Math.round((aiMessages / (aiMessages + humanMessages)) * 100) : 0
 
   const chartData = buildActivityChart(leads)
   const recentLeads = [...leads].slice(0, 5)

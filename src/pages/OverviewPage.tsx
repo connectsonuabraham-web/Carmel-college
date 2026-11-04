@@ -46,8 +46,8 @@ function WhatsAppQuickSection() {
   const { data: usage = {} } = useSetSmartUsage()
   const recent = leads.slice(0, 3)
   const usageTyped = usage as SetSmartUsage
-  const totalConversations = usageTyped.totalConversations || usageTyped.conversations || leads.length
-  const qualifiedLeads = usageTyped.qualifiedLeads || leads.filter((l: SetSmartLead) => (l.status||l.leadStatus) === 'Qualified').length
+  const totalConversations = usageTyped.totalConversations ?? usageTyped.conversations ?? 0
+  const qualifiedLeads = usageTyped.qualifiedLeads ?? leads.filter((l: SetSmartLead) => (l.status||l.leadStatus) === 'Qualified').length
 
   if (leads.length === 0 && totalConversations === 0) return null
 
