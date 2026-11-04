@@ -1,16 +1,16 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect, useRef } from 'react'
 import {
-  Phone, Clock, User, FileText, Play, Activity,
+  Phone, Clock, User, Play, Pause,
   ChevronLeft, ChevronRight, X, ExternalLink,
   CheckCircle2, XCircle, AlertCircle, Loader2,
-  MessageSquare, Wrench, Bot
+  MessageSquare, Wrench, Bot, Volume2
 } from 'lucide-react'
 import { useWebhookCalls } from '../hooks/useWebhookCalls'
 import { useQueryClient } from '@tanstack/react-query'
 import { WebhookCall, WebhookTranscriptTurn } from '../types'
+import { CONFIG } from '../config'
 
 const PAGE_SIZE = 25
-const WEBHOOK_BASE = 'https://darkslategray-giraffe-469443.hostingersite.com'
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 function fmt(dt: string | null) {
@@ -40,8 +40,43 @@ function DispositionBadge({ d }: { d: string | null }) {
 }
 
 // ── Recording player modal ────────────────────────────────────────────────────
+// Fetches recording from Sarvam Analytics API via the server-side proxy.
+// recording_url from the webhook payload is usually null — Sarvam doesn't
+// include it in webhooks. We fetch it using the interaction_id instead.
 function RecordingModal({ call, onClose }: { call: WebhookCall; onClose: () => void }) {
-  const url = call.recording_url
+  const [blobUrl,   setBlobUrl]   = useState<string | null>(null)
+  const [loading,   setLoading]   = useState(true)
+  const [error,     setError]     = useState<string | null>(null)
+  const [isPlaying, setIsPlaying] = useState(false)
+  const audioRef = useRef<HTMLAudioElement>(null)
+
+  useEffect(() => {
+    if (!call.interaction_id) { setLoading(false); setError('No interaction ID'); return }
+    setLoading(true); setError(null)
+
+    // Encode the "/" in interaction_id as %2F
+    const encodedId = call.interaction_id.replace('/', '%2F')
+    const url = `/api/sarvam/${CONFIG.ORG_ID}/${CONFIG.WORKSPACE_ID}/${CONFIG.APP_ID}/recordings/${encodedId}`
+
+    fetch(url)
+      .then(async res => {
+        if (res.status === 404) throw new Error('NO_RECORDING')
+        if (!res.ok) throw new Error(`HTTP ${res.status}`)
+        const ct  = res.headers.get('content-type') || 'audio/wav'
+        const buf = await res.arrayBuffer()
+        setBlobUrl(URL.createObjectURL(new Blob([buf], { type: ct })))
+      })
+      .catch(e => setError(e.message))
+      .finally(() => setLoading(false))
+
+    return () => { if (blobUrl) URL.revokeObjectURL(blobUrl) }
+  }, [call.interaction_id])
+
+  const toggle = () => {
+    if (!audioRef.current) return
+    if (isPlaying) { audioRef.current.pause(); setIsPlaying(false) }
+    else           { audioRef.current.play().catch(() => {}); setIsPlaying(true) }
+  }
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
@@ -57,36 +92,66 @@ function RecordingModal({ call, onClose }: { call: WebhookCall; onClose: () => v
           </button>
         </div>
 
-        {/* Meta strip */}
         <div className="flex gap-4 text-xs text-gray-500 mb-4 flex-wrap">
-          {call.user_phone_number  && <span className="flex items-center gap-1"><User   size={11} />{call.user_phone_number}</span>}
-          {call.duration != null   && <span className="flex items-center gap-1"><Clock  size={11} />{fmtDur(call.duration)}</span>}
-          {call.start_datetime     && <span className="flex items-center gap-1"><Phone  size={11} />{fmt(call.start_datetime)}</span>}
+          {call.user_phone_number && <span className="flex items-center gap-1"><User  size={11} />{call.user_phone_number}</span>}
+          {call.duration != null  && <span className="flex items-center gap-1"><Clock size={11} />{fmtDur(call.duration)}</span>}
+          {call.start_datetime    && <span className="flex items-center gap-1"><Phone size={11} />{fmt(call.start_datetime)}</span>}
         </div>
 
-        {url ? (
-          <div className="bg-green-50 rounded-xl border border-green-100 p-4 space-y-3">
-            <p className="text-xs text-green-700 font-medium">Dual-channel WAV · User (left) · Agent (right)</p>
-            <audio
-              controls
-              src={url}
-              className="w-full"
-              style={{ accentColor: '#4CAF50' }}
-              autoPlay={false}
-            />
-            <a
-              href={url}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center gap-1.5 text-xs text-green-700 hover:text-green-900 font-medium"
-            >
-              <ExternalLink size={12} /> Open in new tab / download
-            </a>
+        {loading && (
+          <div className="flex items-center gap-3 bg-green-50 rounded-xl px-4 py-4 border border-green-100">
+            <Loader2 className="animate-spin text-green-500" size={18} />
+            <p className="text-xs text-green-700">Fetching recording from Sarvam…</p>
           </div>
-        ) : (
+        )}
+
+        {!loading && error === 'NO_RECORDING' && (
           <div className="bg-gray-50 rounded-xl border border-gray-100 px-4 py-6 text-center">
-            <p className="text-sm text-gray-400">No recording available for this call</p>
-            <p className="text-xs text-gray-300 mt-1">The call may not have been recorded, or the recording is still processing.</p>
+            <Volume2 size={24} className="text-gray-200 mx-auto mb-2" />
+            <p className="text-sm text-gray-400">No recording for this call</p>
+            <p className="text-xs text-gray-300 mt-1">The call may not have been recorded.</p>
+          </div>
+        )}
+
+        {!loading && error && error !== 'NO_RECORDING' && (
+          <div className="bg-red-50 rounded-xl border border-red-100 px-4 py-4">
+            <p className="text-xs text-red-600 font-medium">Failed to load recording</p>
+            <p className="text-xs text-red-400 mt-1">{error}</p>
+          </div>
+        )}
+
+        {!loading && blobUrl && (
+          <div className="bg-green-50 rounded-xl border border-green-100 overflow-hidden">
+            <div className="flex items-center gap-3 px-4 py-3">
+              <button
+                onClick={toggle}
+                className="w-9 h-9 rounded-full bg-green-500 hover:bg-green-600 flex items-center justify-center text-white flex-shrink-0 shadow-sm transition-colors"
+              >
+                {isPlaying ? <Pause size={16} /> : <Play size={16} className="ml-0.5" />}
+              </button>
+              <div className="flex-1">
+                <p className="text-xs font-semibold text-green-800">Call Recording</p>
+                <p className="text-[10px] text-green-600 mt-0.5">Dual-channel WAV · User (left) · Agent (right)</p>
+              </div>
+            </div>
+            <div className="px-4 pb-4">
+              <audio
+                ref={audioRef}
+                controls
+                src={blobUrl}
+                onPlay={() => setIsPlaying(true)}
+                onPause={() => setIsPlaying(false)}
+                onEnded={() => setIsPlaying(false)}
+                className="w-full"
+                style={{ accentColor: '#4CAF50' }}
+              />
+            </div>
+            <div className="px-4 pb-3">
+              <a href={blobUrl} download={`recording-${call.interaction_id?.replace('/','-')}.wav`}
+                className="inline-flex items-center gap-1.5 text-xs text-green-700 hover:text-green-900 font-medium">
+                <ExternalLink size={12} /> Download recording
+              </a>
+            </div>
           </div>
         )}
       </div>
@@ -362,12 +427,8 @@ export function WebhookCallsPage() {
                       {/* Play recording */}
                       <button
                         onClick={() => setModal({ type: 'recording', call })}
-                        title={call.recording_url ? 'Play recording' : 'No recording'}
-                        className={`p-1.5 rounded-lg transition-colors ${
-                          call.recording_url
-                            ? 'text-green-600 hover:bg-green-100'
-                            : 'text-gray-300 cursor-not-allowed'
-                        }`}
+                        title="Play recording"
+                        className="p-1.5 rounded-lg transition-colors text-green-600 hover:bg-green-100"
                       >
                         <Play size={14} />
                       </button>

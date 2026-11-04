@@ -200,7 +200,17 @@ const sarvamProxy = (pathRewrite, extra = '') =>
     pathRewrite,
     on: {
       proxyReq(proxyReq) {
-        if (SARVAM_API_KEY) proxyReq.setHeader('X-API-Key', SARVAM_API_KEY)
+        const key = SARVAM_API_KEY
+        if (key) {
+          proxyReq.setHeader('X-API-Key', key)
+        } else {
+          console.error('[proxy] WARNING: SARVAM_API_KEY is not set — requests will fail with 401')
+        }
+      },
+      proxyRes(proxyRes, req) {
+        if (proxyRes.statusCode === 401) {
+          console.error('[proxy] 401 Unauthorized — check SARVAM_API_KEY env var in Hostinger hPanel')
+        }
       },
       error(err, req, res) {
         console.error('[proxy] error:', err.message)
@@ -232,7 +242,19 @@ app.get('/api/health', (req, res) => {
     calls_stored: callsList.length,
     sse_clients:  sseClients.size,
     auth:         SHARED_SECRET ? 'secret_required' : 'open',
+    api_key_set:  !!SARVAM_API_KEY,
     uptime_s:     process.uptime().toFixed(0),
+  })
+})
+
+// Debug — confirms env vars are loaded (safe: only shows key prefix)
+app.get('/api/debug', (req, res) => {
+  res.json({
+    api_key_prefix: SARVAM_API_KEY ? SARVAM_API_KEY.slice(0, 12) + '...' : 'NOT SET',
+    port:           PORT,
+    node_env:       process.env.NODE_ENV || 'not set',
+    calls_stored:   callsList.length,
+    org_id:         ORG_ID,
   })
 })
 
