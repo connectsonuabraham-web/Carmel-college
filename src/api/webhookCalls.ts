@@ -1,8 +1,5 @@
 import { WebhookCallsResponse } from '../types'
 
-// Same-origin — Express serves both the React app and the webhook API
-const WEBHOOK_BASE = ''
-
 export interface FetchWebhookCallsParams {
   limit?:       number
   offset?:      number
@@ -18,7 +15,7 @@ export async function fetchWebhookCalls(params: FetchWebhookCallsParams = {}): P
   if (search)      qs.set('search',      search)
   if (disposition) qs.set('disposition', disposition)
 
-  const res = await fetch(`${WEBHOOK_BASE}/webhook/calls?${qs}`)
-  if (!res.ok) throw new Error(`Webhook server error: ${res.status}`)
+  const res = await fetch(`/api/webhook/calls?${qs}`)
+  if (!res.ok) throw new Error(`Webhook API error: ${res.status}`)
   return res.json() as Promise<WebhookCallsResponse>
 }

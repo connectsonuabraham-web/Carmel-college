@@ -210,27 +210,23 @@ const sarvamProxy = (pathRewrite, extra = '') =>
   })
 
 // Main analytics (interactions, attempts, transcripts, recordings, traces)
-app.use(
-  '/api-proxy',
-  sarvamProxy({ '^/api-proxy': '/api/analytics/v1' })
-)
+app.use('/api/sarvam', sarvamProxy({ '^/api/sarvam': '/api/analytics/v1' }))
 
 // Campaigns
-app.use(
-  '/campaigns-proxy',
-  sarvamProxy({ '^/campaigns-proxy': `/api/scheduling/v1/orgs/${ORG_ID}/workspaces/${WS_ID}` })
-)
+app.use('/api/campaigns', sarvamProxy({ '^/api/campaigns': `/api/scheduling/v1/orgs/${ORG_ID}/workspaces/${WS_ID}` }))
 
 // Boards
-app.use(
-  '/boards-proxy',
-  sarvamProxy({ '^/boards-proxy': `/api/analytics/v1/${ORG_ID}/${WS_ID}/boards` })
-)
+app.use('/api/boards', sarvamProxy({ '^/api/boards': `/api/analytics/v1/${ORG_ID}/${WS_ID}/boards` }))
+
+// Legacy proxy paths (kept for backwards compatibility)
+app.use('/api-proxy',       sarvamProxy({ '^/api-proxy':       '/api/analytics/v1' }))
+app.use('/campaigns-proxy', sarvamProxy({ '^/campaigns-proxy': `/api/scheduling/v1/orgs/${ORG_ID}/workspaces/${WS_ID}` }))
+app.use('/boards-proxy',    sarvamProxy({ '^/boards-proxy':    `/api/analytics/v1/${ORG_ID}/${WS_ID}/boards` }))
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Health
 // ─────────────────────────────────────────────────────────────────────────────
-app.get('/health', (req, res) => {
+app.get('/api/health', (req, res) => {
   res.json({
     status:       'ok',
     calls_stored: callsList.length,
@@ -290,10 +286,13 @@ async function handleWebhook(req, res, legacyMap) {
 }
 
 // Canonical endpoint — paste this URL into Sarvam
-app.post('/webhook/call', (req, res) => handleWebhook(req, res, null))
+app.post('/api/webhook/call', (req, res) => handleWebhook(req, res, null))
 
-// Legacy endpoints (kept for backwards compatibility)
-const legacyMapper = (body) => ({
+// Legacy paths
+app.post('/webhook/call',     (req, res) => handleWebhook(req, res, null))
+app.post('/api/webhook/inbound',  (req, res) => handleWebhook(req, res, legacyMapper))
+app.post('/api/webhook/campaign', (req, res) => handleWebhook(req, res, legacyMapper))
+app.post('/api/webhook/outbound', (req, res) => handleWebhook(req, res, legacyMapper))
   app_id:                 body.app_id            || 'unknown',
   app_version:            body.app_version        || 0,
   deployment_id:          body.deployment_id      || 'unknown',
@@ -317,7 +316,7 @@ app.post('/webhook/outbound', (req, res) => handleWebhook(req, res, legacyMapper
 // ─────────────────────────────────────────────────────────────────────────────
 // GET /webhook/calls  — paginated call list for the dashboard
 // ─────────────────────────────────────────────────────────────────────────────
-app.get('/webhook/calls', (req, res) => {
+app.get('/api/webhook/calls', (req, res) => {
   const limit    = Math.min(parseInt(req.query.limit  || '100'), 1000)
   const offset   = Math.max(parseInt(req.query.offset || '0'),   0)
   const search   = (req.query.search      || '').toLowerCase()

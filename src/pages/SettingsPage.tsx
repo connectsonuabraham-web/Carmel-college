@@ -145,15 +145,15 @@ export function SettingsPage() {
             <div className="space-y-2">
               <div>
                 <p className="text-[10px] text-gray-400 mb-1 font-medium uppercase tracking-wide">Inbound calls</p>
-                <CopyableUrl url={`${PUBLIC_DOMAIN}/webhook/inbound`} />
+            <CopyableUrl url={`${PUBLIC_DOMAIN}/api/webhook/call`} />
               </div>
               <div>
                 <p className="text-[10px] text-gray-400 mb-1 font-medium uppercase tracking-wide">Campaign calls</p>
-                <CopyableUrl url={`${PUBLIC_DOMAIN}/webhook/campaign`} />
+            <CopyableUrl url={`${PUBLIC_DOMAIN}/api/webhook/call`} />
               </div>
               <div>
                 <p className="text-[10px] text-gray-400 mb-1 font-medium uppercase tracking-wide">Instant outbound calls</p>
-                <CopyableUrl url={`${PUBLIC_DOMAIN}/webhook/outbound`} />
+            <CopyableUrl url={`${PUBLIC_DOMAIN}/api/webhook/call`} />
               </div>
             </div>
           </Step>

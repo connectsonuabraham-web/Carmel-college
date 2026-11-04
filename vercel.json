@@ -1,16 +1,15 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "version": 2,
-  "builds": [
-    {
-      "src": "server.js",
-      "use": "@vercel/node"
-    }
-  ],
-  "routes": [
-    {
-      "src": "/(.*)",
-      "dest": "server.js"
-    }
+  "framework": "vite",
+  "buildCommand": "npm run build",
+  "outputDirectory": "dist",
+  "rewrites": [
+    { "source": "/api/webhook/call",   "destination": "/api/webhook/call" },
+    { "source": "/api/webhook/calls",  "destination": "/api/webhook/calls" },
+    { "source": "/api/health",         "destination": "/api/health" },
+    { "source": "/api/sarvam/(.*)",    "destination": "/api/sarvam/$1" },
+    { "source": "/api/campaigns/(.*)", "destination": "/api/campaigns/$1" },
+    { "source": "/api/boards/(.*)",    "destination": "/api/boards/$1" }
   ]
 }

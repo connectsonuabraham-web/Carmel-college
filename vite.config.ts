@@ -1,21 +1,28 @@
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 
-// Vite is now used ONLY for building the React frontend into dist/.
-// All proxying (Sarvam API, webhook routes) is handled by the Express
-// server in server.js — which works in both dev and production.
-//
-// To develop:
-//   npm run build      — builds the React app into dist/
-//   npm start          — starts Express (serves dist/ + all APIs)
-//
-// Or for hot-reload UI dev only:
-//   npm run dev:ui     — Vite HMR on :5173 (no API proxy, just UI)
-
+/**
+ * In dev: Vite proxies /api/* to the local Express server (server.js on :3001)
+ * In prod (Vercel): /api/* routes are handled by Vercel serverless functions in api/
+ *
+ * Run both together for local dev:
+ *   Terminal 1: node server.js        (Express on :3001)
+ *   Terminal 2: npm run dev:ui        (Vite HMR on :5173)
+ *
+ * Or just: npm start  (Express serves built dist/ on :3001 — no HMR)
+ */
 export default defineConfig({
   plugins: [react()],
   build: {
     outDir: 'dist',
     emptyOutDir: true,
+  },
+  server: {
+    proxy: {
+      '/api': {
+        target:      'http://localhost:3001',
+        changeOrigin: true,
+      },
+    },
   },
 })

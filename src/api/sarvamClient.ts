@@ -1,10 +1,10 @@
 import axios from 'axios'
 import { CONFIG } from '../config'
 
-// The Express server (server.js) proxies /api-proxy/* to Sarvam, injecting
-// the API key server-side. This works in both dev and production — no more
-// DEV/PROD switch needed. The key never appears in browser network requests.
-const baseURL = `/api-proxy/${CONFIG.ORG_ID}/${CONFIG.WORKSPACE_ID}/${CONFIG.APP_ID}`
+// All Sarvam API calls go through /api/sarvam/* on the same origin.
+// The Vercel serverless function at api/sarvam/[...path].js proxies to
+// Sarvam and injects the API key server-side.
+const baseURL = `/api/sarvam/${CONFIG.ORG_ID}/${CONFIG.WORKSPACE_ID}/${CONFIG.APP_ID}`
 
 export const sarvamClient = axios.create({ baseURL })
 
