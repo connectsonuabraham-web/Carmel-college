@@ -1,0 +1,17 @@
+{
+  "name": "sarvam-webhook-server",
+  "version": "1.0.0",
+  "description": "Webhook receiver for Sarvam Voice Agent — Carmel College of Nursing",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node --watch server.js",
+    "pm2": "pm2 start server.js --name sarvam-webhook --watch false"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "keywords": ["sarvam", "webhook", "voice-agent"],
+  "author": "Carmel College of Nursing",
+  "license": "MIT"
+}
