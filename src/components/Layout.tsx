@@ -5,22 +5,25 @@ import { useWebhookStream } from '../hooks/useWebhookStream'
 import {
   LayoutDashboard, Phone, PhoneCall, BarChart3, Menu, Megaphone,
   Layers, LayoutGrid, Bell, Settings, Download, LogOut, GraduationCap,
-  RefreshCw, Radio, Zap
+  RefreshCw, Radio, Zap, MessageCircle, MessageSquare, Users
 } from 'lucide-react'
 
 const navItems = [
-  { to: '/',           label: 'Overview',    icon: <LayoutDashboard size={18} /> },
-  { to: '/live-calls', label: 'Live Calls',  icon: <Zap size={18} /> },
-  { to: '/calls',      label: 'Call Logs',   icon: <Phone size={18} /> },
-  { to: '/attempts',   label: 'Attempts',    icon: <PhoneCall size={18} /> },
-  { to: '/campaigns',  label: 'Campaigns',   icon: <Megaphone size={18} /> },
-  { to: '/group-by',   label: 'Group By',    icon: <Layers size={18} /> },
-  { to: '/analytics',  label: 'Analytics',   icon: <BarChart3 size={18} /> },
-  { to: '/boards',     label: 'Boards',      icon: <LayoutGrid size={18} /> },
+  { to: '/',                        label: 'Overview',         icon: <LayoutDashboard size={18} /> },
+  { to: '/live-calls',              label: 'Live Calls',       icon: <Zap size={18} /> },
+  { to: '/calls',                   label: 'Call Logs',        icon: <Phone size={18} /> },
+  { to: '/attempts',                label: 'Attempts',         icon: <PhoneCall size={18} /> },
+  { to: '/analytics',               label: 'Analytics',        icon: <BarChart3 size={18} /> },
+  { to: '/whatsapp',                label: 'WhatsApp Agent',   icon: <MessageCircle size={18} /> },
+  { to: '/whatsapp/conversations',  label: 'Conversations',    icon: <MessageSquare size={18} /> },
+  { to: '/whatsapp/leads',          label: 'Leads & CRM',      icon: <Users size={18} /> },
 ]
 
 const otherItems = [
-  { to: '/settings', label: 'Settings', icon: <Settings size={18} /> },
+  { to: '/campaigns', label: 'Campaigns', icon: <Megaphone size={18} /> },
+  { to: '/group-by',  label: 'Group By',  icon: <Layers size={18} /> },
+  { to: '/boards',    label: 'Boards',    icon: <LayoutGrid size={18} /> },
+  { to: '/settings',  label: 'Settings',  icon: <Settings size={18} /> },
 ]
 
 export function Layout() {
