@@ -1,35 +1,5 @@
 import React from 'react'
-import { Megaphone, ExternalLink } from 'lucide-react'
-
-export function CampaignsWAPage() {
-  return (
-    <div className="space-y-5">
-      <div>
-        <h1 className="text-2xl font-bold text-gray-900">WhatsApp Campaigns</h1>
-        <p className="text-sm text-gray-500 mt-0.5">Manage bulk WhatsApp campaign broadcasts.</p>
-      </div>
-      <div className="bg-yellow-50 border border-yellow-200 rounded-2xl p-6">
-        <div className="flex items-start gap-3">
-          <div className="w-10 h-10 rounded-xl bg-yellow-100 flex items-center justify-center flex-shrink-0">
-            <Megaphone size={18} className="text-yellow-700" />
-          </div>
-          <div className="flex-1">
-            <p className="font-semibold text-yellow-800">Campaigns API not available</p>
-            <p className="text-sm text-yellow-700 mt-1">
-              The SetSmart Campaigns API endpoint is not accessible with your current API key.
-              Create and manage campaigns directly in your SetSmart dashboard.
-            </p>
-            <a
-              href="https://setsmart.io"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="mt-3 inline-flex items-center gap-2 bg-green-500 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-green-600 transition-colors"
-            >
-              Open SetSmart Dashboard <ExternalLink size={14} />
-            </a>
-          </div>
-        </div>
-      </div>
-    </div>
-  )
+import { Megaphone, Workflow, Info } from 'lucide-react'
+export function CampaignsWAPage(){
+ return <div className="space-y-5"><div><h1 className="text-2xl font-bold text-gray-900">WhatsApp Campaigns</h1><p className="text-sm text-gray-500 mt-1">Outbound campaign management for Carmel College.</p></div><div className="rounded-xl border border-gray-200 bg-white p-6"><div className="flex items-start gap-3"><div className="rounded-lg bg-gray-50 p-3 text-gray-600"><Megaphone size={20}/></div><div><h2 className="text-sm font-semibold text-gray-900">Campaign broadcasting is not part of the current workflow</h2><p className="mt-2 text-sm text-gray-500">The supplied n8n exports cover inbound WhatsApp conversations, AI responses, knowledge retrieval and requested brochure delivery. They do not include a bulk campaign workflow, so this page is presented as not configured rather than showing invented campaign data.</p></div></div></div><div className="rounded-xl border border-blue-100 bg-blue-50 p-4 flex gap-3 text-xs text-blue-800"><Workflow size={16} className="shrink-0"/><p>No changes have been made to your existing n8n workflows or WhatsApp account.</p></div></div>
 }
