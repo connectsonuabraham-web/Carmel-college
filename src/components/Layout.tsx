@@ -9,17 +9,17 @@ import {
 } from 'lucide-react'
 
 const navItems = [
-  { to: '/',                        label: 'Overview',         icon: <LayoutDashboard size={18} /> },
-  { to: '/calls',                   label: 'Voice Agents',     icon: <Phone size={18} /> },
-  { to: '/whatsapp',                label: 'WhatsApp Agent',   icon: <MessageCircle size={18} /> },
-  { to: '/whatsapp/conversations',  label: 'Conversations',    icon: <MessagesSquare size={18} /> },
-  { to: '/templates',               label: 'Templates',        icon: <FileText size={18} /> },
-  { to: '/campaigns-wa',            label: 'Campaigns',        icon: <Megaphone size={18} /> },
-  { to: '/ai-assistant',            label: 'AI Assistant',     icon: <Bot size={18} /> },
+  { to: '/',                        label: 'Overview',         icon: <LayoutDashboard className="w-4 h-4" /> },
+  { to: '/calls',                   label: 'Voice Agents',     icon: <Phone className="w-4 h-4" /> },
+  { to: '/whatsapp',                label: 'WhatsApp Agent',   icon: <MessageCircle className="w-4 h-4" /> },
+  { to: '/whatsapp/conversations',  label: 'Conversations',    icon: <MessagesSquare className="w-4 h-4" /> },
+  { to: '/templates',               label: 'Templates',        icon: <FileText className="w-4 h-4" /> },
+  { to: '/campaigns-wa',            label: 'Campaigns',        icon: <Megaphone className="w-4 h-4" /> },
+  { to: '/ai-assistant',            label: 'AI Assistant',     icon: <Bot className="w-4 h-4" /> },
 ]
 
 const otherItems = [
-  { to: '/settings', label: 'Settings', icon: <Settings size={18} /> },
+  { to: '/settings', label: 'Settings', icon: <Settings className="w-4 h-4" /> },
 ]
 
 export function Layout() {
@@ -69,21 +69,19 @@ export function Layout() {
   const SidebarContent = () => (
     <div className="flex flex-col h-full">
       {/* Logo */}
-      <div className="px-5 py-5 border-b border-gray-100">
+      <div className="px-5 py-5 border-b border-white/[0.05]">
         <div className="flex items-center gap-3">
-          <div className="w-9 h-9 rounded-xl bg-green-500 flex items-center justify-center flex-shrink-0">
-            <GraduationCap size={18} className="text-white" />
-          </div>
+          <div className="w-7 h-7 bg-green-500 flex-shrink-0" />
           <div className="min-w-0">
-            <p className="font-bold text-gray-900 text-sm leading-tight truncate">Carmel College</p>
-            <p className="font-medium text-green-600 text-xs leading-tight truncate">of Nursing</p>
+            <p className="font-semibold text-white text-sm leading-tight truncate">Carmel College</p>
+            <p className="text-[11px] text-[#475569] leading-tight truncate">of Nursing</p>
           </div>
         </div>
       </div>
 
       {/* Nav */}
-      <div className="flex-1 px-3 py-4 overflow-y-auto">
-        <p className="text-[10px] font-semibold text-gray-400 uppercase tracking-widest px-3 mb-2">Main Menu</p>
+      <div className="flex-1 py-4 overflow-y-auto">
+        <p className="text-[10px] uppercase tracking-widest font-semibold text-[#475569] px-4 mb-1 mt-4">Main</p>
         <div className="space-y-0.5">
           {navItems.map((item) => (
             <NavLink
@@ -92,11 +90,9 @@ export function Layout() {
               end={item.to === '/'}
               onClick={() => setMobileOpen(false)}
               className={({ isActive }) =>
-                `flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors ${
-                  isActive
-                    ? 'bg-green-500 text-white'
-                    : 'text-gray-600 hover:bg-green-50 hover:text-green-700'
-                }`
+                isActive
+                  ? 'flex items-center gap-3 px-4 py-2 text-[13px] font-medium text-green-400 bg-green-500/[0.08] border-l-2 border-green-500'
+                  : 'flex items-center gap-3 px-4 py-2 text-[13px] font-medium text-[#94a3b8] hover:bg-white/[0.03] hover:text-[#f1f5f9] transition-colors'
               }
             >
               {item.icon}
@@ -105,7 +101,7 @@ export function Layout() {
           ))}
         </div>
 
-        <p className="text-[10px] font-semibold text-gray-400 uppercase tracking-widest px-3 mt-5 mb-2">Other</p>
+        <p className="text-[10px] uppercase tracking-widest font-semibold text-[#475569] px-4 mb-1 mt-4">Settings</p>
         <div className="space-y-0.5">
           {otherItems.map((item) => (
             <NavLink
@@ -113,11 +109,9 @@ export function Layout() {
               to={item.to}
               onClick={() => setMobileOpen(false)}
               className={({ isActive }) =>
-                `flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors ${
-                  isActive
-                    ? 'bg-green-500 text-white'
-                    : 'text-gray-600 hover:bg-green-50 hover:text-green-700'
-                }`
+                isActive
+                  ? 'flex items-center gap-3 px-4 py-2 text-[13px] font-medium text-green-400 bg-green-500/[0.08] border-l-2 border-green-500'
+                  : 'flex items-center gap-3 px-4 py-2 text-[13px] font-medium text-[#94a3b8] hover:bg-white/[0.03] hover:text-[#f1f5f9] transition-colors'
               }
             >
               {item.icon}
@@ -128,113 +122,98 @@ export function Layout() {
       </div>
 
       {/* User profile */}
-      <div className="px-3 py-4 border-t border-gray-100">
-        <div className="flex items-center gap-3 px-2 py-2 rounded-lg hover:bg-green-50 transition-colors">
-          <div className="w-8 h-8 rounded-full bg-green-100 flex items-center justify-center flex-shrink-0">
-            <span className="text-green-700 font-bold text-xs">CC</span>
+      <div className="px-3 py-4 border-t border-white/[0.05]">
+        <div className="flex items-center gap-3 px-2 py-2 transition-colors">
+          <div className="w-8 h-8 rounded-full bg-[#1a1d2e] flex items-center justify-center flex-shrink-0">
+            <span className="text-green-400 font-bold text-xs">CC</span>
           </div>
           <div className="min-w-0 flex-1">
-            <p className="text-xs font-semibold text-gray-900 truncate">Carmel College</p>
-            <p className="text-[10px] text-gray-400 truncate">admin@carmelcollege.edu</p>
+            <p className="text-xs font-semibold text-[#f1f5f9] truncate">Carmel College</p>
+            <p className="text-[11px] text-[#475569] truncate">admin@carmelcollege.edu</p>
           </div>
-          <LogOut size={14} className="text-gray-400 flex-shrink-0" />
+          <LogOut className="w-4 h-4 text-[#475569] hover:text-red-400 flex-shrink-0 cursor-pointer transition-colors" />
         </div>
       </div>
     </div>
   )
 
   return (
-    <div className="min-h-screen bg-[#e8f5e9] p-3">
-      <div className="bg-white rounded-3xl shadow-lg overflow-hidden flex h-[calc(100vh-24px)]">
-        {/* Desktop sidebar */}
-        <aside className="hidden md:flex flex-col w-[220px] flex-shrink-0 bg-white border-r border-gray-100">
-          <SidebarContent />
-        </aside>
+    <div className="min-h-screen bg-[#0f1117] flex">
+      {/* Desktop sidebar */}
+      <aside className="hidden md:flex flex-col w-60 flex-shrink-0 bg-[#0f1117] border-r border-white/[0.05]">
+        <SidebarContent />
+      </aside>
 
-        {/* Mobile sidebar overlay */}
-        {mobileOpen && (
-          <div className="fixed inset-0 z-50 flex md:hidden">
-            <div className="w-[220px] bg-white flex flex-col shadow-xl">
-              <SidebarContent />
-            </div>
-            <div className="flex-1 bg-black/40" onClick={() => setMobileOpen(false)} />
+      {/* Mobile sidebar overlay */}
+      {mobileOpen && (
+        <div className="fixed inset-0 z-50 flex md:hidden">
+          <div className="w-60 bg-[#0f1117] border-r border-white/[0.05] flex flex-col shadow-xl">
+            <SidebarContent />
           </div>
-        )}
+          <div className="flex-1 bg-black/40" onClick={() => setMobileOpen(false)} />
+        </div>
+      )}
 
-        {/* Main area */}
-        <div className="flex-1 flex flex-col min-w-0">
-          {/* Top bar */}
-          <header className="flex items-center gap-3 px-5 py-3 bg-white border-b border-gray-100 flex-shrink-0">
+      {/* Main area */}
+      <div className="flex-1 flex flex-col min-w-0 bg-[#0f1117]">
+        {/* Top bar */}
+        <header className="bg-[#0f1117] border-b border-white/[0.05] h-14 flex items-center px-6 gap-4 flex-shrink-0">
+          <button
+            className="md:hidden p-1.5 rounded-lg text-[#94a3b8] hover:text-[#f1f5f9]"
+            onClick={() => setMobileOpen(true)}
+          >
+            <Menu className="w-4 h-4" />
+          </button>
+
+          {/* Page title */}
+          <span className="text-[15px] font-semibold text-[#f1f5f9] mr-auto">Dashboard</span>
+
+          <div className="flex items-center gap-2">
+            {/* Webhook live badge */}
+            {webhookStatus === 'connected' && (
+              <span className="hidden sm:flex items-center gap-1.5 bg-green-500/10 text-green-400 border border-green-500/20 rounded-md px-2 py-0.5 text-[11px]">
+                <span className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse" />
+                Live
+              </span>
+            )}
+            {webhookStatus === 'disconnected' && (
+              <span className="hidden sm:flex items-center gap-1.5 bg-red-500/10 text-red-400 border border-red-500/20 rounded-md px-2 py-0.5 text-[11px]">
+                <Radio className="w-4 h-4" />
+                Reconnecting
+              </span>
+            )}
+
+            {/* New call toast */}
+            {newCallToast && (
+              <span className="hidden sm:flex items-center gap-1.5 text-[11px] font-semibold text-white bg-green-500 px-3 py-1 rounded-md animate-pulse">
+                📞 New call received!
+              </span>
+            )}
+
+            <span className="text-[11px] text-[#475569] hidden sm:block">
+              {secondsAgo < 5 ? 'Just updated' : `Updated ${secondsAgo}s ago`}
+            </span>
+
             <button
-              className="md:hidden p-1.5 rounded-lg text-gray-500 hover:bg-gray-100"
-              onClick={() => setMobileOpen(true)}
+              onClick={handleManualRefresh}
+              title="Refresh data now"
+              className={`bg-[#1a1d2e] border border-white/[0.06] text-[#94a3b8] hover:text-[#f1f5f9] rounded-lg p-2 transition-colors ${refreshing ? 'animate-spin' : ''}`}
             >
-              <Menu size={18} />
+              <RefreshCw className="w-4 h-4" />
             </button>
 
-            <div className="flex-1 hidden md:block">
-              <div className="relative max-w-xs">
-                <svg className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
-                <input
-                  type="text"
-                  placeholder="Search calls, callers…"
-                  value={search}
-                  onChange={(e) => setSearch(e.target.value)}
-                  className="w-full rounded-full border border-gray-200 bg-gray-50 pl-8 pr-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-green-300 focus:border-green-400"
-                />
-              </div>
-            </div>
+            <button className="bg-[#1a1d2e] border border-white/[0.06] text-[#94a3b8] hover:text-[#f1f5f9] rounded-lg p-2 transition-colors">
+              <Bell className="w-4 h-4" />
+            </button>
+          </div>
+        </header>
 
-            <div className="flex items-center gap-2 ml-auto">
-              {/* Webhook live badge */}
-              {webhookStatus === 'connected' && (
-                <span className="hidden sm:flex items-center gap-1.5 text-xs font-medium text-green-700 bg-green-100 px-2.5 py-1 rounded-full">
-                  <span className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse" />
-                  Live
-                </span>
-              )}
-              {webhookStatus === 'disconnected' && (
-                <span className="hidden sm:flex items-center gap-1.5 text-xs font-medium text-yellow-700 bg-yellow-50 px-2.5 py-1 rounded-full">
-                  <Radio size={11} />
-                  Reconnecting
-                </span>
-              )}
-
-              {/* New call toast */}
-              {newCallToast && (
-                <span className="hidden sm:flex items-center gap-1.5 text-xs font-semibold text-white bg-green-500 px-3 py-1 rounded-full animate-pulse">
-                  📞 New call received!
-                </span>
-              )}
-
-              <span className="text-xs text-gray-400 hidden sm:block">
-                {secondsAgo < 5 ? 'Just updated' : `Updated ${secondsAgo}s ago`}
-              </span>
-              <button
-                onClick={handleManualRefresh}
-                title="Refresh data now"
-                className={`p-2 rounded-lg text-gray-400 hover:text-green-600 hover:bg-green-50 transition-colors ${refreshing ? 'animate-spin text-green-500' : ''}`}
-              >
-                <RefreshCw size={16} />
-              </button>
-              <button className="p-2 rounded-lg text-gray-400 hover:text-gray-600 hover:bg-gray-100">
-                <Bell size={16} />
-              </button>
-              <button className="p-2 rounded-lg text-gray-400 hover:text-gray-600 hover:bg-gray-100">
-                <Settings size={16} />
-              </button>
-              <button className="flex items-center gap-2 bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors">
-                <Download size={14} />
-                Export
-              </button>
-            </div>
-          </header>
-
-          {/* Page content */}
-          <main className="flex-1 overflow-y-auto bg-gray-50 p-5">
+        {/* Page content */}
+        <main className="flex-1 overflow-y-auto bg-[#0f1117]">
+          <div className="p-6">
             <Outlet />
-          </main>
-        </div>
+          </div>
+        </main>
       </div>
     </div>
   )
