@@ -14,9 +14,6 @@ import {
   RadialBarChart, RadialBar, BarChart, Bar, Cell, ResponsiveContainer,
   PieChart, Pie, Tooltip, Legend
 } from 'recharts'
-import { useLeads, useConversations, useAiOffLeads } from '../hooks/useSetSmart'
-import type { Lead } from '../api/setsmart'
-import { MessageCircle, BarChart3 } from 'lucide-react'
 
 const OUTCOME_COLORS = ['#4CAF50', '#ef4444', '#f59e0b', '#6366f1', '#94a3b8']
 
@@ -39,72 +36,6 @@ function webhookToInteraction(wc: WebhookCall): Interaction {
     started_at:         wc.start_datetime ?? wc.received_at,
     created_at:         wc.received_at,
   }
-}
-
-function WhatsAppQuickSection() {
-  const { data: leads = [] } = useLeads()
-  const { data: convsResp } = useConversations()
-  const { data: aiOff = [] } = useAiOffLeads()
-
-  const totalConversations = convsResp?.total ?? 0
-  const totalMessages = convsResp?.conversations.reduce((s, c) => s + c.message_count, 0) ?? 0
-  const bookedLeads = leads.filter((l: Lead) => l.ok_call !== 'N/A').length
-  const aiActive = leads.length - aiOff.length
-  const recentConvs = [...(convsResp?.conversations ?? [])]
-    .sort((a, b) => new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime())
-    .slice(0, 3)
-
-  if (leads.length === 0 && totalConversations === 0) return null
-
-  return (
-    <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
-      <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5">
-        <div className="flex items-center justify-between mb-4">
-          <h3 className="text-sm font-semibold text-gray-900 flex items-center gap-2">
-            <MessageCircle size={15} className="text-green-500" /> Recent WhatsApp Conversations
-          </h3>
-          <a href="/whatsapp/conversations" className="text-xs text-green-600 hover:underline">View All →</a>
-        </div>
-        {recentConvs.length === 0 ? (
-          <p className="text-xs text-gray-400 text-center py-4">No WhatsApp conversations yet</p>
-        ) : (
-          <div className="space-y-3">
-            {recentConvs.map((conv, i) => {
-              const name = conv.contact.name || 'Unknown'
-              const status = conv.qualification.status || 'New'
-              const statusMap: Record<string, string> = { Qualified: 'bg-green-100 text-green-700', Booked: 'bg-blue-100 text-blue-700', Open: 'bg-gray-100 text-gray-600', New: 'bg-yellow-100 text-yellow-700' }
-              return (
-                <div key={i} className="flex items-center gap-3 py-1">
-                  <div className="w-8 h-8 rounded-full bg-green-100 flex items-center justify-center flex-shrink-0">
-                    <span className="text-green-700 text-[10px] font-bold">{name.slice(0, 2).toUpperCase()}</span>
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-xs font-medium text-gray-900 truncate">{name}</p>
-                    <p className="text-[10px] text-gray-400 truncate">{conv.messages[conv.messages.length - 1]?.content ?? '—'}</p>
-                  </div>
-                  <div className="flex items-center gap-1.5">
-                    <span className={`text-[10px] px-1.5 py-0.5 rounded-full font-medium ${statusMap[status] ?? 'bg-gray-100 text-gray-600'}`}>{status}</span>
-                  </div>
-                </div>
-              )
-            })}
-          </div>
-        )}
-      </div>
-      <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5">
-        <h3 className="text-sm font-semibold text-gray-900 mb-4 flex items-center gap-2">
-          <BarChart3 size={15} className="text-green-500" /> WhatsApp Summary
-        </h3>
-        <div className="grid grid-cols-2 gap-4">
-          <div><p className="text-2xl font-bold text-gray-900">{totalConversations}</p><p className="text-xs text-gray-400">Total Conversations</p></div>
-          <div><p className="text-2xl font-bold text-gray-900">{leads.length}</p><p className="text-xs text-gray-400">Total Leads</p></div>
-          <div><p className="text-2xl font-bold text-gray-900">{bookedLeads}</p><p className="text-xs text-gray-400">Booked Leads</p></div>
-          <div><p className="text-2xl font-bold text-gray-900">{aiActive}</p><p className="text-xs text-gray-400">AI Active</p></div>
-          <div className="col-span-2"><p className="text-2xl font-bold text-gray-900">{totalMessages}</p><p className="text-xs text-gray-400">Total Messages</p></div>
-        </div>
-      </div>
-    </div>
-  )
 }
 
 export function OverviewPage() {
@@ -395,7 +326,7 @@ export function OverviewPage() {
         </div>
       </div>
 
-      <WhatsAppQuickSection />
+
     </div>
   )
 }
