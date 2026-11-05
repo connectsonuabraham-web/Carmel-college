@@ -249,69 +249,6 @@ app.all('/api/campaigns/*', (req, res) => sarvamFetchProxy(req, res, SARVAM_SCHE
 app.all('/api/boards/*',    (req, res) => sarvamFetchProxy(req, res, `${SARVAM_ANALYTICS}/${ORG_ID}/${WS_ID}/boards`))
 app.all('/api-proxy/*',     (req, res) => sarvamFetchProxy(req, res, SARVAM_ANALYTICS))
 
-// WhatsApp integration — Supabase stores dashboard data; n8n handles WhatsApp actions.
-const SUPABASE_URL = (process.env.SUPABASE_URL || '').replace(/\/$/, '')
-const SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY || ''
-const N8N_WHATSAPP_SEND_WEBHOOK = process.env.N8N_WHATSAPP_SEND_WEBHOOK || ''
-const N8N_WHATSAPP_CONTROL_WEBHOOK = process.env.N8N_WHATSAPP_CONTROL_WEBHOOK || ''
-const WA_TABLES = {
-  contacts: process.env.WA_CONTACTS_TABLE || 'whatsapp_contacts',
-  conversations: process.env.WA_CONVERSATIONS_TABLE || 'whatsapp_conversations',
-  messages: process.env.WA_MESSAGES_TABLE || 'whatsapp_messages',
-  leads: process.env.WA_LEADS_TABLE || 'whatsapp_leads',
-}
-function supabaseReady(res) {
-  if (SUPABASE_URL && SUPABASE_SERVICE_ROLE_KEY) return true
-  res.status(503).json({ error: 'whatsapp_storage_not_configured', message: 'Set SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY on the server.' })
-  return false
-}
-async function supabaseRows(table, query = 'select=*') {
-  const response = await fetch(`${SUPABASE_URL}/rest/v1/${encodeURIComponent(table)}?${query}`, {
-    headers: { apikey: SUPABASE_SERVICE_ROLE_KEY, Authorization: `Bearer ${SUPABASE_SERVICE_ROLE_KEY}`, Accept: 'application/json' }
-  })
-  const body = await response.text()
-  if (!response.ok) throw new Error(`Supabase ${table} returned ${response.status}: ${body.slice(0, 300)}`)
-  return body ? JSON.parse(body) : []
-}
-async function postN8nWebhook(url, payload) {
-  if (!url) throw new Error('The required n8n webhook URL is not configured on the server.')
-  const response = await fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) })
-  const body = await response.text()
-  if (!response.ok) throw new Error(`n8n webhook returned ${response.status}: ${body.slice(0, 300)}`)
-  return body ? JSON.parse(body) : { success: true }
-}
-app.get('/api/whatsapp/config', (req, res) => {
-  res.json({ storageConfigured: !!(SUPABASE_URL && SUPABASE_SERVICE_ROLE_KEY), sendConfigured: !!N8N_WHATSAPP_SEND_WEBHOOK, controlConfigured: !!N8N_WHATSAPP_CONTROL_WEBHOOK })
-})
-app.get('/api/whatsapp/:resource', async (req, res) => {
-  const table = WA_TABLES[req.params.resource]
-  if (!table) return res.status(404).json({ error: 'unknown_whatsapp_resource' })
-  if (!supabaseReady(res)) return
-  try {
-    const limit = Math.min(Math.max(Number(req.query.limit) || 100, 1), 500)
-    const rows = await supabaseRows(table, `select=*&limit=${limit}`)
-    res.json({ data: rows })
-  } catch (error) {
-    res.status(502).json({ error: 'whatsapp_data_fetch_failed', message: error.message })
-  }
-})
-app.post('/api/whatsapp/send', async (req, res) => {
-  const { phone, message, conversation_id } = req.body || {}
-  if (!phone || !message || !String(message).trim()) return res.status(400).json({ error: 'phone_and_message_required' })
-  try {
-    const result = await postN8nWebhook(N8N_WHATSAPP_SEND_WEBHOOK, { action: 'send_message', phone, message: String(message).trim(), conversation_id: conversation_id || null, source: 'carmel_dashboard' })
-    res.json({ success: true, result })
-  } catch (error) { res.status(502).json({ error: 'whatsapp_send_failed', message: error.message }) }
-})
-app.post('/api/whatsapp/control', async (req, res) => {
-  const { phone, conversation_id, action } = req.body || {}
-  if (!phone || !['pause_ai', 'resume_ai'].includes(action)) return res.status(400).json({ error: 'phone_and_valid_action_required' })
-  try {
-    const result = await postN8nWebhook(N8N_WHATSAPP_CONTROL_WEBHOOK, { action, phone, conversation_id: conversation_id || null, source: 'carmel_dashboard' })
-    res.json({ success: true, result })
-  } catch (error) { res.status(502).json({ error: 'whatsapp_control_failed', message: error.message }) }
-})
-
 // ─────────────────────────────────────────────────────────────────────────────
 // Health
 // ─────────────────────────────────────────────────────────────────────────────
