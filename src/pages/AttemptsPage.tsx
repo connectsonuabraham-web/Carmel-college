@@ -17,8 +17,8 @@ export function AttemptsPage() {
     <div className="space-y-5">
       <div className="flex flex-wrap gap-4 items-start justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Attempts</h1>
-          <p className="text-sm text-gray-500 mt-0.5">{data?.total ?? 0} attempts · {rate}% connection rate</p>
+          <h1 className="text-xl font-semibold text-[#f1f5f9]">Attempts</h1>
+          <p className="text-sm text-[#475569] mt-0.5">{data?.total ?? 0} attempts · {rate}% connection rate</p>
         </div>
         <div className="flex items-center gap-3">
           {isFetching && <span className="text-xs text-green-600 animate-pulse font-medium">Refreshing…</span>}

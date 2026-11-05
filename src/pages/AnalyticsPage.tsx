@@ -53,8 +53,8 @@ export function AnalyticsPage() {
   }, [interactions])
 
   const ChartCard = ({ title, children }: { title: string; children: React.ReactNode }) => (
-    <div className="bg-white rounded-2xl border border-gray-100 shadow-card p-5">
-      <h3 className="text-sm font-semibold text-gray-900 mb-3">{title}</h3>
+    <div className="bg-[#1a1d2e] rounded-xl border border-white/[0.06] p-5">
+      <h3 className="text-sm font-semibold text-[#f1f5f9] mb-3">{title}</h3>
       {children}
     </div>
   )
@@ -62,25 +62,25 @@ export function AnalyticsPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-bold text-gray-900">Analytics</h1>
-        <p className="text-sm text-gray-500 mt-0.5">Detailed breakdown of agent performance</p>
+        <h1 className="text-xl font-semibold text-[#f1f5f9]">Analytics</h1>
+        <p className="text-sm text-[#475569] mt-0.5">Detailed breakdown of agent performance</p>
       </div>
       <DateRangePicker value={dateRange} onChange={setDateRange} />
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <ChartCard title="Calls by Language">
-          {languageData.length > 0 ? <LanguageChart data={languageData} /> : <p className="text-sm text-gray-400 py-8 text-center">No data</p>}
+          {languageData.length > 0 ? <LanguageChart data={languageData} /> : <p className="text-sm text-[#475569] py-8 text-center">No data</p>}
         </ChartCard>
         <ChartCard title="Hourly Call Distribution">
           <HourlyChart data={hourlyData} />
         </ChartCard>
         <ChartCard title="Calls by Direction">
-          {directionData.length > 0 ? <EndReasonChart data={directionData} /> : <p className="text-sm text-gray-400 py-8 text-center">No data</p>}
+          {directionData.length > 0 ? <EndReasonChart data={directionData} /> : <p className="text-sm text-[#475569] py-8 text-center">No data</p>}
         </ChartCard>
         <ChartCard title="Goal Success Rate">
-          {goalData.length > 0 ? <GoalStatusChart data={goalData} /> : <p className="text-sm text-gray-400 py-8 text-center">No data</p>}
+          {goalData.length > 0 ? <GoalStatusChart data={goalData} /> : <p className="text-sm text-[#475569] py-8 text-center">No data</p>}
         </ChartCard>
         <ChartCard title="Top Failure Reasons">
-          {failureData.length > 0 ? <FailureReasonsChart data={failureData} /> : <p className="text-sm text-gray-400 py-8 text-center">No failure data</p>}
+          {failureData.length > 0 ? <FailureReasonsChart data={failureData} /> : <p className="text-sm text-[#475569] py-8 text-center">No failure data</p>}
         </ChartCard>
       </div>
     </div>

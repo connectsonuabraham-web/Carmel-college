@@ -123,15 +123,15 @@ export function CallsPage() {
 
   const activeFilterCount = Object.values(advFilters).filter((v) => v !== '').length
 
-  const selectClass = 'rounded-lg border border-gray-300 bg-white px-2 py-1.5 text-xs focus:outline-none focus:ring-2 focus:ring-green-300 focus:border-green-400 min-w-[120px]'
-  const inputClass  = 'rounded-lg border border-gray-300 bg-white px-2 py-1.5 text-xs focus:outline-none focus:ring-2 focus:ring-green-300 focus:border-green-400 w-24'
+  const selectClass = 'rounded-lg border border-white/[0.08] bg-[#1a1d2e] px-2 py-1.5 text-xs text-[#94a3b8] focus:outline-none focus:ring-2 focus:ring-green-300 focus:border-green-400 min-w-[120px]'
+  const inputClass  = 'rounded-lg border border-white/[0.08] bg-[#1a1d2e] px-2 py-1.5 text-xs text-[#94a3b8] placeholder-[#475569] focus:outline-none focus:ring-2 focus:ring-green-300 focus:border-green-400 w-24'
 
   return (
     <div className="space-y-5">
       <div className="flex flex-wrap gap-4 items-start justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Call Logs</h1>
-          <p className="text-sm text-gray-500 mt-0.5">
+          <h1 className="text-xl font-semibold text-[#f1f5f9]">Call Logs</h1>
+          <p className="text-sm text-[#475569] mt-0.5">
             {(data?.total ?? webhookData?.total ?? 0)} total interactions · click a row to view transcript, recording &amp; log analyser
             {sarvamInteractions.length === 0 && webhookInteractions.length > 0 && (
               <span className="ml-2 text-xs text-green-600 font-medium">⚡ showing live webhook data</span>
@@ -144,23 +144,23 @@ export function CallsPage() {
       <DateRangePicker value={dateRange} onChange={setDateRange} />
 
       {/* Advanced Filters */}
-      <div className="rounded-xl border border-gray-200 bg-white">
+      <div className="rounded-xl border border-white/[0.06] bg-[#1a1d2e]">
         <button
-          className="w-full flex items-center justify-between px-4 py-3 text-sm font-medium text-gray-700"
+          className="w-full flex items-center justify-between px-4 py-3 text-sm font-medium text-[#94a3b8]"
           onClick={() => setShowAdvanced(!showAdvanced)}
         >
           <span className="flex items-center gap-2">
             <Filter size={15} />
             Advanced Filters
             {activeFilterCount > 0 && (
-              <span className="ml-1 bg-green-500 text-white text-xs rounded-full px-1.5 py-0.5">{activeFilterCount}</span>
+              <span className="ml-1 bg-green-600 text-white text-xs rounded-full px-1.5 py-0.5">{activeFilterCount}</span>
             )}
           </span>
           {showAdvanced ? <ChevronUp size={15} /> : <ChevronDown size={15} />}
         </button>
 
         {showAdvanced && (
-          <div className="px-4 pb-4 border-t border-gray-100 pt-3">
+          <div className="px-4 pb-4 border-t border-white/[0.06] pt-3">
             <div className="flex flex-wrap gap-3">
               {[
                 { label: 'Language',    key: 'language_name',      opts: getUniqueValues(allInteractions, 'language_name') },
@@ -171,7 +171,7 @@ export function CallsPage() {
                 { label: 'Channel Type',key: 'channel_type',       opts: getUniqueValues(allInteractions, 'channel_type') },
               ].map(({ label, key, opts }) => (
                 <div key={key} className="flex flex-col gap-1">
-                  <label className="text-xs text-gray-500">{label}</label>
+                  <label className="text-xs text-[#475569]">{label}</label>
                   <select value={(advFilters as Record<string, string>)[key]} onChange={(e) => updateFilter(key as keyof AdvancedFilter, e.target.value)} className={selectClass}>
                     <option value="">All</option>
                     {opts.map((v) => <option key={v} value={v}>{v}</option>)}
@@ -179,7 +179,7 @@ export function CallsPage() {
                 </div>
               ))}
               <div className="flex flex-col gap-1">
-                <label className="text-xs text-gray-500">Direction</label>
+                <label className="text-xs text-[#475569]">Direction</label>
                 <select value={advFilters.channel_direction} onChange={(e) => updateFilter('channel_direction', e.target.value)} className={selectClass}>
                   <option value="">All</option>
                   <option value="inbound">Inbound</option>
@@ -193,7 +193,7 @@ export function CallsPage() {
                 { label: 'Max Turns',        key: 'num_messages_max', ph: '20' },
               ].map(({ label, key, ph }) => (
                 <div key={key} className="flex flex-col gap-1">
-                  <label className="text-xs text-gray-500">{label}</label>
+                  <label className="text-xs text-[#475569]">{label}</label>
                   <input type="number" placeholder={ph} value={(advFilters as Record<string, string>)[key]} onChange={(e) => updateFilter(key as keyof AdvancedFilter, e.target.value)} className={inputClass} />
                 </div>
               ))}
@@ -202,7 +202,7 @@ export function CallsPage() {
                 { label: 'Has Log Issues',key: 'has_log_issues' },
               ].map(({ label, key }) => (
                 <div key={key} className="flex flex-col gap-1">
-                  <label className="text-xs text-gray-500">{label}</label>
+                  <label className="text-xs text-[#475569]">{label}</label>
                   <select value={(advFilters as Record<string, string>)[key]} onChange={(e) => updateFilter(key as keyof AdvancedFilter, e.target.value)} className={selectClass}>
                     <option value="">All</option>
                     <option value="true">Yes</option>
@@ -212,7 +212,7 @@ export function CallsPage() {
               ))}
             </div>
             {activeFilterCount > 0 && (
-              <button onClick={clearFilters} className="mt-3 text-xs text-red-500 hover:text-red-700 underline">
+              <button onClick={clearFilters} className="mt-3 text-xs text-red-400 hover:text-red-300 underline">
                 Clear all filters ({activeFilterCount})
               </button>
             )}
