@@ -34,19 +34,22 @@ export function CallsTable({ interactions, onOpen, isLoading }: Props) {
   const paged = filtered.slice(page * PAGE_SIZE, (page + 1) * PAGE_SIZE)
 
   const statusBadge = (s: string) => {
-    const map: Record<string, string> = {
-      connected: 'bg-green-100 text-green-700',
-      disconnected: 'bg-red-100 text-red-700',
-      failed: 'bg-red-100 text-red-700',
+    let cls: string
+    if (s === 'connected') {
+      cls = 'bg-green-500/10 text-green-400'
+    } else if (s === 'failed' || s === 'disconnected') {
+      cls = 'bg-red-500/10 text-red-400'
+    } else {
+      cls = 'bg-amber-500/10 text-amber-400'
     }
     return (
-      <span className={`text-xs px-2 py-0.5 rounded-full font-medium capitalize ${map[s] ?? 'bg-gray-100 text-gray-600'}`}>
+      <span className={`rounded-md px-2 py-0.5 text-xs capitalize ${cls}`}>
         {s}
       </span>
     )
   }
 
-  const inputClass = 'rounded-lg border border-gray-300 bg-white px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-green-300 focus:border-green-400'
+  const inputClass = 'rounded-lg border border-white/[0.06] bg-[#1a1d2e] px-3 py-1.5 text-sm text-[#94a3b8] focus:outline-none focus:ring-2 focus:ring-green-500/30 focus:border-green-500/40'
 
   return (
     <div>
@@ -89,53 +92,58 @@ export function CallsTable({ interactions, onOpen, isLoading }: Props) {
         </select>
       </div>
 
-      {isLoading && <p className="text-sm text-gray-400 mb-2">Loading…</p>}
+      {isLoading && <p className="text-sm text-[#475569] mb-2">Loading…</p>}
 
       {/* Table */}
-      <div className="overflow-x-auto rounded-2xl border border-gray-100 shadow-card">
+      <div className="bg-[#1a1d2e] rounded-xl border border-white/[0.06] overflow-hidden overflow-x-auto">
         <table className="min-w-full text-sm">
-          <thead className="bg-gray-50">
+          <thead className="bg-white/[0.03]">
             <tr>
               {['Date/Time', 'Caller', 'Duration', 'Language', 'Direction', 'Status', 'End Reason', 'Goal', 'Actions'].map((h) => (
-                <th key={h} className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider whitespace-nowrap">{h}</th>
+                <th key={h} className="text-[10px] uppercase tracking-widest text-[#475569] font-semibold px-4 py-3 text-left whitespace-nowrap">{h}</th>
               ))}
             </tr>
           </thead>
-          <tbody className="divide-y divide-gray-50">
+          <tbody>
             {paged.length === 0 ? (
               <tr>
-                <td colSpan={9} className="px-4 py-8 text-center text-gray-400">No interactions found</td>
+                <td colSpan={9} className="px-4 py-8 text-center text-[#475569] text-sm">No interactions found</td>
               </tr>
             ) : (
               paged.map((item) => (
-                <tr key={item.interaction_id} className="hover:bg-green-50 transition-colors">
-                  <td className="px-4 py-3 whitespace-nowrap text-gray-600">
+                <tr
+                  key={item.interaction_id}
+                  className="border-b border-white/[0.04] hover:bg-white/[0.02] transition-colors cursor-pointer"
+                >
+                  <td className="text-[13px] text-[#94a3b8] px-4 py-3 whitespace-nowrap">
                     {item.started_at ? formatDateTime(item.started_at) : item.created_at ? formatDateTime(item.created_at) : '—'}
                   </td>
-                  <td className="px-4 py-3 font-mono text-xs">{item.user_contact_masked || '—'}</td>
-                  <td className="px-4 py-3">{item.duration_in_seconds != null ? formatDuration(item.duration_in_seconds) : '—'}</td>
-                  <td className="px-4 py-3">{item.language_name || '—'}</td>
-                  <td className="px-4 py-3 capitalize">{item.channel_direction}</td>
-                  <td className="px-4 py-3">{statusBadge(item.connectivity_status)}</td>
-                  <td className="px-4 py-3 capitalize">{item.end_reason || '—'}</td>
-                  <td className="px-4 py-3">
-                    <span className={`text-xs px-2 py-0.5 rounded-full font-medium capitalize ${
-                      item.goal_overall_status === 'success' ? 'bg-green-100 text-green-700'
-                      : item.goal_overall_status === 'failed' ? 'bg-red-100 text-red-700'
-                      : 'bg-gray-100 text-gray-600'
+                  <td className="text-[13px] text-[#94a3b8] px-4 py-3 font-mono text-xs">{item.user_contact_masked || '—'}</td>
+                  <td className="text-[13px] text-[#94a3b8] px-4 py-3">{item.duration_in_seconds != null ? formatDuration(item.duration_in_seconds) : '—'}</td>
+                  <td className="text-[13px] text-[#94a3b8] px-4 py-3">{item.language_name || '—'}</td>
+                  <td className="text-[13px] text-[#94a3b8] px-4 py-3 capitalize">{item.channel_direction}</td>
+                  <td className="text-[13px] text-[#94a3b8] px-4 py-3">{statusBadge(item.connectivity_status)}</td>
+                  <td className="text-[13px] text-[#94a3b8] px-4 py-3 capitalize">{item.end_reason || '—'}</td>
+                  <td className="text-[13px] text-[#94a3b8] px-4 py-3">
+                    <span className={`rounded-md px-2 py-0.5 text-xs capitalize ${
+                      item.goal_overall_status === 'success'
+                        ? 'bg-green-500/10 text-green-400'
+                        : item.goal_overall_status === 'failed'
+                        ? 'bg-red-500/10 text-red-400'
+                        : 'bg-amber-500/10 text-amber-400'
                     }`}>
                       {item.goal_overall_status || '—'}
                     </span>
                   </td>
-                  <td className="px-4 py-3">
+                  <td className="text-[13px] text-[#94a3b8] px-4 py-3">
                     <div className="flex gap-2">
-                      <button onClick={() => onOpen(item, 'transcript')} title="Transcript" className="p-1.5 rounded hover:bg-green-50 text-green-600">
+                      <button onClick={() => onOpen(item, 'transcript')} title="Transcript" className="p-1.5 rounded hover:bg-white/[0.04] text-green-400">
                         <FileText size={15} />
                       </button>
-                      <button onClick={() => onOpen(item, 'overview')} title="Recording" className="p-1.5 rounded hover:bg-green-50 text-green-600">
+                      <button onClick={() => onOpen(item, 'overview')} title="Recording" className="p-1.5 rounded hover:bg-white/[0.04] text-green-400">
                         <Play size={15} />
                       </button>
-                      <button onClick={() => onOpen(item, 'log-analyser')} title="Log Analyser" className="p-1.5 rounded hover:bg-green-50 text-green-700">
+                      <button onClick={() => onOpen(item, 'log-analyser')} title="Log Analyser" className="p-1.5 rounded hover:bg-white/[0.04] text-green-400">
                         <Activity size={15} />
                       </button>
                     </div>
@@ -150,21 +158,21 @@ export function CallsTable({ interactions, onOpen, isLoading }: Props) {
       {/* Pagination */}
       {totalPages > 1 && (
         <div className="flex items-center justify-between mt-4">
-          <p className="text-sm text-gray-500">
+          <p className="text-[#94a3b8] text-sm">
             {page * PAGE_SIZE + 1}–{Math.min((page + 1) * PAGE_SIZE, filtered.length)} of {filtered.length}
           </p>
           <div className="flex gap-2">
             <button
               disabled={page === 0}
               onClick={() => setPage(p => p - 1)}
-              className="p-1.5 rounded border disabled:opacity-40 hover:bg-green-50"
+              className="bg-[#1a1d2e] border border-white/[0.06] text-[#94a3b8] rounded-lg px-2 py-1 hover:bg-white/[0.04] disabled:opacity-40"
             >
               <ChevronLeft size={16} />
             </button>
             <button
               disabled={page >= totalPages - 1}
               onClick={() => setPage(p => p + 1)}
-              className="p-1.5 rounded border disabled:opacity-40 hover:bg-green-50"
+              className="bg-[#1a1d2e] border border-white/[0.06] text-[#94a3b8] rounded-lg px-2 py-1 hover:bg-white/[0.04] disabled:opacity-40"
             >
               <ChevronRight size={16} />
             </button>
