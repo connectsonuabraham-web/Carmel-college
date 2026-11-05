@@ -1,59 +1,34 @@
 import React from 'react'
-import { TrendingUp, TrendingDown, ArrowRight } from 'lucide-react'
 
-interface Delta {
-  value: string
-  positive: boolean
-}
-
-interface StatCardProps {
+interface Props {
   title: string
   value: string | number
-  delta?: Delta
+  subtitle?: string
+  delta?: { value: string; positive: boolean }
   miniChart?: React.ReactNode
   periodLabel?: string
-  onSeeDetails?: () => void
-  color?: string
-  subtitle?: string
   icon?: React.ReactNode
 }
 
-export function StatCard({ title, value, delta, miniChart, periodLabel, onSeeDetails, subtitle }: StatCardProps) {
+export function StatCard({ title, value, subtitle, delta, miniChart, icon }: Props) {
   return (
-    <div className="bg-white rounded-2xl border border-gray-100 shadow-card p-5 flex flex-col">
-      <div className="flex items-start justify-between mb-3">
-        <p className="text-xs font-medium text-gray-500 uppercase tracking-wide">{title}</p>
-        {miniChart && <div className="flex-shrink-0">{miniChart}</div>}
+    <div className="bg-[#1a1d2e] border border-white/[0.06] rounded-xl p-5 flex flex-col gap-3">
+      <div className="flex items-start justify-between">
+        <p className="text-[10px] font-semibold uppercase tracking-widest text-[#475569]">{title}</p>
+        {icon && <div className="text-[#475569]">{icon}</div>}
+        {miniChart && !icon && <div className="opacity-70">{miniChart}</div>}
       </div>
-      <p className="text-3xl font-bold text-gray-900 leading-none mb-2">{value}</p>
-      {(delta || subtitle) && (
-        <div className="flex items-center gap-1.5 text-xs">
-          {delta && (
-            <>
-              {delta.positive ? (
-                <TrendingUp size={12} className="text-green-500" />
-              ) : (
-                <TrendingDown size={12} className="text-red-500" />
-              )}
-              <span className={delta.positive ? 'text-green-600 font-medium' : 'text-red-500 font-medium'}>
-                {delta.value}
-              </span>
-            </>
-          )}
-          {periodLabel && <span className="text-gray-400">{periodLabel}</span>}
-          {subtitle && !delta && <span className="text-gray-400">{subtitle}</span>}
-        </div>
-      )}
-      {onSeeDetails && (
-        <div className="border-t border-gray-100 pt-3 mt-auto mt-4">
-          <button
-            onClick={onSeeDetails}
-            className="flex items-center gap-1 text-xs font-medium text-green-600 hover:text-green-700"
-          >
-            See Details <ArrowRight size={12} />
-          </button>
-        </div>
-      )}
+      <p className="text-3xl font-bold text-[#f1f5f9] leading-none">{value}</p>
+      <div className="flex items-center gap-2">
+        {delta && (
+          <span className={`text-xs font-medium ${delta.positive ? 'text-green-400' : 'text-red-400'}`}>
+            {delta.positive ? '↑' : '↓'} {delta.value}
+          </span>
+        )}
+        {subtitle && <span className="text-xs text-[#475569]">{subtitle}</span>}
+      </div>
     </div>
   )
 }
+
+export default StatCard

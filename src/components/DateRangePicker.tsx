@@ -13,25 +13,25 @@ export function DateRangePicker({ value, onChange }: DateRangePickerProps) {
   return (
     <div className="flex flex-wrap gap-3 items-center">
       <div className="flex items-center gap-2">
-        <label className="text-sm text-gray-500">From</label>
+        <label className="text-[#475569] text-xs">From</label>
         <input
           type="datetime-local"
           value={fmt(value.start)}
           onChange={(e) =>
             onChange({ ...value, start: new Date(e.target.value) })
           }
-          className="rounded-lg border border-gray-300 bg-white px-3 py-1.5 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-green-300 focus:border-green-400"
+          className="bg-[#1a1d2e] border border-white/[0.08] text-[#94a3b8] rounded-lg text-sm px-3 py-1.5 focus:outline-none focus:ring-1 focus:ring-white/20"
         />
       </div>
       <div className="flex items-center gap-2">
-        <label className="text-sm text-gray-500">To</label>
+        <label className="text-[#475569] text-xs">To</label>
         <input
           type="datetime-local"
           value={fmt(value.end)}
           onChange={(e) =>
             onChange({ ...value, end: new Date(e.target.value) })
           }
-          className="rounded-lg border border-gray-300 bg-white px-3 py-1.5 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-green-300 focus:border-green-400"
+          className="bg-[#1a1d2e] border border-white/[0.08] text-[#94a3b8] rounded-lg text-sm px-3 py-1.5 focus:outline-none focus:ring-1 focus:ring-white/20"
         />
       </div>
       <div className="flex gap-2">
@@ -45,7 +45,7 @@ export function DateRangePicker({ value, onChange }: DateRangePickerProps) {
               start.setHours(0, 0, 0, 0)
               onChange({ start, end })
             }}
-            className="rounded-md bg-green-50 px-3 py-1.5 text-xs font-medium text-green-700 hover:bg-green-100 transition-colors"
+            className="bg-[#1a1d2e] border border-white/[0.08] text-[#94a3b8] hover:bg-white/[0.04] rounded-lg px-3 py-1.5 text-sm transition-colors"
           >
             Last {days}d
           </button>
