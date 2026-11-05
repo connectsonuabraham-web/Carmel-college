@@ -289,7 +289,7 @@ app.get('/api/whatsapp/:resource', async (req, res) => {
   if (!supabaseReady(res)) return
   try {
     const limit = Math.min(Math.max(Number(req.query.limit) || 100, 1), 500)
-    const rows = await supabaseRows(table, `select=*&order=updated_at.desc&limit=${limit}`)
+    const rows = await supabaseRows(table, `select=*&limit=${limit}`)
     res.json({ data: rows })
   } catch (error) {
     res.status(502).json({ error: 'whatsapp_data_fetch_failed', message: error.message })
