@@ -2,240 +2,28 @@ import React, { useEffect, useState } from 'react'
 import { NavLink, Outlet } from 'react-router-dom'
 import { useQueryClient } from '@tanstack/react-query'
 import { useWebhookStream } from '../hooks/useWebhookStream'
-import {
-  LayoutDashboard, Phone, Menu, Megaphone,
-  Bell, Settings, Download, LogOut, GraduationCap,
-  RefreshCw, Radio, MessageCircle, MessagesSquare, FileText, Bot
-} from 'lucide-react'
+import { LayoutDashboard, Phone, Menu, Bell, Settings, Download, LogOut, GraduationCap, RefreshCw, Radio, MessageCircle, MessagesSquare, FileText, Bot, Users, Megaphone } from 'lucide-react'
 
-const navItems = [
-  { to: '/',                        label: 'Overview',         icon: <LayoutDashboard size={18} /> },
-  { to: '/calls',                   label: 'Voice Agents',     icon: <Phone size={18} /> },
-  { to: '/whatsapp',                label: 'WhatsApp Agent',   icon: <MessageCircle size={18} /> },
-  { to: '/whatsapp/conversations',  label: 'Conversations',    icon: <MessagesSquare size={18} /> },
-  { to: '/templates',               label: 'Templates',        icon: <FileText size={18} /> },
-  { to: '/campaigns-wa',            label: 'Campaigns',        icon: <Megaphone size={18} /> },
-  { to: '/ai-assistant',            label: 'AI Assistant',     icon: <Bot size={18} /> },
+const navItems=[
+ {to:'/',label:'Overview',icon:<LayoutDashboard size={18}/>},
+ {to:'/calls',label:'Voice Agents',icon:<Phone size={18}/>},
+ {to:'/whatsapp',label:'WhatsApp Agent',icon:<MessageCircle size={18}/>},
+ {to:'/whatsapp/conversations',label:'Conversations',icon:<MessagesSquare size={18}/>},
+ {to:'/whatsapp/leads',label:'Leads',icon:<Users size={18}/>},
+ {to:'/templates',label:'Templates',icon:<FileText size={18}/>},
+ {to:'/campaigns-wa',label:'Campaigns',icon:<Megaphone size={18}/>},
+ {to:'/ai-assistant',label:'AI Assistant',icon:<Bot size={18}/>}
 ]
-
-const otherItems = [
-  { to: '/settings', label: 'Settings', icon: <Settings size={18} /> },
-]
-
-export function Layout() {
-  const [mobileOpen, setMobileOpen] = useState(false)
-  const [lastUpdated, setLastUpdated] = useState(new Date())
-  const [secondsAgo, setSecondsAgo] = useState(0)
-  const [refreshing, setRefreshing] = useState(false)
-  const [search, setSearch] = useState('')
-  const queryClient = useQueryClient()
-  const { status: webhookStatus, lastCall } = useWebhookStream()
-
-  // Flash "New call!" toast when webhook fires
-  const [newCallToast, setNewCallToast] = useState(false)
-  useEffect(() => {
-    if (lastCall) {
-      setNewCallToast(true)
-      const t = setTimeout(() => setNewCallToast(false), 4000)
-      return () => clearTimeout(t)
-    }
-  }, [lastCall])
-
-  // Tick every second so the countdown is live
-  useEffect(() => {
-    const id = setInterval(() => {
-      setSecondsAgo(Math.floor((Date.now() - lastUpdated.getTime()) / 1000))
-    }, 1000)
-    return () => clearInterval(id)
-  }, [lastUpdated])
-
-  // Auto-refresh every 62s and update the timestamp
-  useEffect(() => {
-    const id = setInterval(() => {
-      queryClient.invalidateQueries()
-      setLastUpdated(new Date())
-    }, 62000)
-    return () => clearInterval(id)
-  }, [queryClient])
-
-  async function handleManualRefresh() {
-    setRefreshing(true)
-    await queryClient.invalidateQueries()
-    setLastUpdated(new Date())
-    setSecondsAgo(0)
-    setTimeout(() => setRefreshing(false), 800)
-  }
-
-  const SidebarContent = () => (
-    <div className="flex flex-col h-full">
-      {/* Logo */}
-      <div className="px-5 py-5 border-b border-gray-100">
-        <div className="flex items-center gap-3">
-          <div className="w-9 h-9 rounded-xl bg-green-500 flex items-center justify-center flex-shrink-0">
-            <GraduationCap size={18} className="text-white" />
-          </div>
-          <div className="min-w-0">
-            <p className="font-bold text-gray-900 text-sm leading-tight truncate">Carmel College</p>
-            <p className="font-medium text-green-600 text-xs leading-tight truncate">of Nursing</p>
-          </div>
-        </div>
-      </div>
-
-      {/* Nav */}
-      <div className="flex-1 px-3 py-4 overflow-y-auto">
-        <p className="text-[10px] font-semibold text-gray-400 uppercase tracking-widest px-3 mb-2">Main Menu</p>
-        <div className="space-y-0.5">
-          {navItems.map((item) => (
-            <NavLink
-              key={item.to}
-              to={item.to}
-              end={item.to === '/'}
-              onClick={() => setMobileOpen(false)}
-              className={({ isActive }) =>
-                `flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors ${
-                  isActive
-                    ? 'bg-green-500 text-white'
-                    : 'text-gray-600 hover:bg-green-50 hover:text-green-700'
-                }`
-              }
-            >
-              {item.icon}
-              {item.label}
-            </NavLink>
-          ))}
-        </div>
-
-        <p className="text-[10px] font-semibold text-gray-400 uppercase tracking-widest px-3 mt-5 mb-2">Other</p>
-        <div className="space-y-0.5">
-          {otherItems.map((item) => (
-            <NavLink
-              key={item.to}
-              to={item.to}
-              onClick={() => setMobileOpen(false)}
-              className={({ isActive }) =>
-                `flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors ${
-                  isActive
-                    ? 'bg-green-500 text-white'
-                    : 'text-gray-600 hover:bg-green-50 hover:text-green-700'
-                }`
-              }
-            >
-              {item.icon}
-              {item.label}
-            </NavLink>
-          ))}
-        </div>
-      </div>
-
-      {/* User profile */}
-      <div className="px-3 py-4 border-t border-gray-100">
-        <div className="flex items-center gap-3 px-2 py-2 rounded-lg hover:bg-green-50 transition-colors">
-          <div className="w-8 h-8 rounded-full bg-green-100 flex items-center justify-center flex-shrink-0">
-            <span className="text-green-700 font-bold text-xs">CC</span>
-          </div>
-          <div className="min-w-0 flex-1">
-            <p className="text-xs font-semibold text-gray-900 truncate">Carmel College</p>
-            <p className="text-[10px] text-gray-400 truncate">admin@carmelcollege.edu</p>
-          </div>
-          <LogOut size={14} className="text-gray-400 flex-shrink-0" />
-        </div>
-      </div>
-    </div>
-  )
-
-  return (
-    <div className="min-h-screen bg-[#e8f5e9] p-3">
-      <div className="bg-white rounded-3xl shadow-lg overflow-hidden flex h-[calc(100vh-24px)]">
-        {/* Desktop sidebar */}
-        <aside className="hidden md:flex flex-col w-[220px] flex-shrink-0 bg-white border-r border-gray-100">
-          <SidebarContent />
-        </aside>
-
-        {/* Mobile sidebar overlay */}
-        {mobileOpen && (
-          <div className="fixed inset-0 z-50 flex md:hidden">
-            <div className="w-[220px] bg-white flex flex-col shadow-xl">
-              <SidebarContent />
-            </div>
-            <div className="flex-1 bg-black/40" onClick={() => setMobileOpen(false)} />
-          </div>
-        )}
-
-        {/* Main area */}
-        <div className="flex-1 flex flex-col min-w-0">
-          {/* Top bar */}
-          <header className="flex items-center gap-3 px-5 py-3 bg-white border-b border-gray-100 flex-shrink-0">
-            <button
-              className="md:hidden p-1.5 rounded-lg text-gray-500 hover:bg-gray-100"
-              onClick={() => setMobileOpen(true)}
-            >
-              <Menu size={18} />
-            </button>
-
-            <div className="flex-1 hidden md:block">
-              <div className="relative max-w-xs">
-                <svg className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
-                <input
-                  type="text"
-                  placeholder="Search calls, callers…"
-                  value={search}
-                  onChange={(e) => setSearch(e.target.value)}
-                  className="w-full rounded-full border border-gray-200 bg-gray-50 pl-8 pr-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-green-300 focus:border-green-400"
-                />
-              </div>
-            </div>
-
-            <div className="flex items-center gap-2 ml-auto">
-              {/* Webhook live badge */}
-              {webhookStatus === 'connected' && (
-                <span className="hidden sm:flex items-center gap-1.5 text-xs font-medium text-green-700 bg-green-100 px-2.5 py-1 rounded-full">
-                  <span className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse" />
-                  Live
-                </span>
-              )}
-              {webhookStatus === 'disconnected' && (
-                <span className="hidden sm:flex items-center gap-1.5 text-xs font-medium text-yellow-700 bg-yellow-50 px-2.5 py-1 rounded-full">
-                  <Radio size={11} />
-                  Reconnecting
-                </span>
-              )}
-
-              {/* New call toast */}
-              {newCallToast && (
-                <span className="hidden sm:flex items-center gap-1.5 text-xs font-semibold text-white bg-green-500 px-3 py-1 rounded-full animate-pulse">
-                  📞 New call received!
-                </span>
-              )}
-
-              <span className="text-xs text-gray-400 hidden sm:block">
-                {secondsAgo < 5 ? 'Just updated' : `Updated ${secondsAgo}s ago`}
-              </span>
-              <button
-                onClick={handleManualRefresh}
-                title="Refresh data now"
-                className={`p-2 rounded-lg text-gray-400 hover:text-green-600 hover:bg-green-50 transition-colors ${refreshing ? 'animate-spin text-green-500' : ''}`}
-              >
-                <RefreshCw size={16} />
-              </button>
-              <button className="p-2 rounded-lg text-gray-400 hover:text-gray-600 hover:bg-gray-100">
-                <Bell size={16} />
-              </button>
-              <button className="p-2 rounded-lg text-gray-400 hover:text-gray-600 hover:bg-gray-100">
-                <Settings size={16} />
-              </button>
-              <button className="flex items-center gap-2 bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors">
-                <Download size={14} />
-                Export
-              </button>
-            </div>
-          </header>
-
-          {/* Page content */}
-          <main className="flex-1 overflow-y-auto bg-gray-50 p-5">
-            <Outlet />
-          </main>
-        </div>
-      </div>
-    </div>
-  )
+const otherItems=[{to:'/settings',label:'Settings',icon:<Settings size={18}/>}]
+export function Layout(){
+ const [mobileOpen,setMobileOpen]=useState(false),[lastUpdated,setLastUpdated]=useState(new Date()),[secondsAgo,setSecondsAgo]=useState(0),[refreshing,setRefreshing]=useState(false)
+ const queryClient=useQueryClient()
+ const {status:webhookStatus,lastCall}=useWebhookStream()
+ const [newCallToast,setNewCallToast]=useState(false)
+ useEffect(()=>{if(lastCall){setNewCallToast(true);const t=setTimeout(()=>setNewCallToast(false),4000);return()=>clearTimeout(t)}},[lastCall])
+ useEffect(()=>{const id=setInterval(()=>setSecondsAgo(Math.floor((Date.now()-lastUpdated.getTime())/1000)),1000);return()=>clearInterval(id)},[lastUpdated])
+ useEffect(()=>{const id=setInterval(()=>{queryClient.invalidateQueries();setLastUpdated(new Date())},62000);return()=>clearInterval(id)},[queryClient])
+ async function handleManualRefresh(){setRefreshing(true);await queryClient.invalidateQueries();setLastUpdated(new Date());setSecondsAgo(0);setTimeout(()=>setRefreshing(false),800)}
+ const SidebarContent=()=> <div className="flex h-full flex-col"><div className="border-b border-gray-100 px-5 py-5"><div className="flex items-center gap-3"><div className="flex h-9 w-9 items-center justify-center rounded-lg bg-green-600"><GraduationCap size={18} className="text-white"/></div><div className="min-w-0"><p className="truncate text-sm font-bold leading-tight text-gray-900">Carmel College</p><p className="truncate text-xs font-medium leading-tight text-green-700">of Nursing</p></div></div></div><div className="flex-1 overflow-y-auto px-3 py-4"><p className="mb-2 px-3 text-[10px] font-semibold uppercase tracking-widest text-gray-400">Main Menu</p><div className="space-y-1">{navItems.map(item=><NavLink key={item.to} to={item.to} end={item.to==='/'} onClick={()=>setMobileOpen(false)} className={({isActive})=>`flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors ${isActive?'bg-green-600 text-white':'text-gray-600 hover:bg-gray-100 hover:text-gray-900'}`}>{item.icon}{item.label}</NavLink>)}</div><p className="mb-2 mt-6 px-3 text-[10px] font-semibold uppercase tracking-widest text-gray-400">Other</p>{otherItems.map(item=><NavLink key={item.to} to={item.to} onClick={()=>setMobileOpen(false)} className={({isActive})=>`flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium ${isActive?'bg-green-600 text-white':'text-gray-600 hover:bg-gray-100'}`}>{item.icon}{item.label}</NavLink>)}</div><div className="border-t border-gray-100 px-4 py-4"><div className="flex items-center gap-3 rounded-lg px-2 py-2"><div className="flex h-8 w-8 items-center justify-center rounded-full bg-green-50 text-xs font-bold text-green-700">CC</div><div className="min-w-0 flex-1"><p className="truncate text-xs font-semibold text-gray-900">Carmel College</p><p className="truncate text-[10px] text-gray-400">Dashboard</p></div><LogOut size={14} className="text-gray-300"/></div></div></div>
+ return <div className="min-h-screen bg-gray-100 p-3"><div className="flex h-[calc(100vh-24px)] overflow-hidden rounded-2xl border border-gray-200 bg-white"><aside className="hidden w-[230px] shrink-0 border-r border-gray-100 bg-white md:flex md:flex-col"><SidebarContent/></aside>{mobileOpen&&<div className="fixed inset-0 z-50 flex md:hidden"><div className="flex w-[230px] flex-col bg-white shadow-xl"><SidebarContent/></div><div className="flex-1 bg-black/40" onClick={()=>setMobileOpen(false)}/></div>}<div className="flex min-w-0 flex-1 flex-col"><header className="flex shrink-0 items-center gap-3 border-b border-gray-100 bg-white px-5 py-3"><button className="rounded-lg p-1.5 text-gray-500 hover:bg-gray-100 md:hidden" onClick={()=>setMobileOpen(true)}><Menu size={18}/></button><div className="hidden flex-1 text-sm font-medium text-gray-700 md:block">Carmel College Dashboard</div><div className="ml-auto flex items-center gap-2">{webhookStatus==='connected'&&<span className="hidden items-center gap-1.5 rounded-full bg-green-50 px-2.5 py-1 text-xs font-medium text-green-700 sm:flex"><span className="h-1.5 w-1.5 animate-pulse rounded-full bg-green-500"/>Voice live</span>}{webhookStatus==='disconnected'&&<span className="hidden items-center gap-1.5 rounded-full bg-amber-50 px-2.5 py-1 text-xs font-medium text-amber-700 sm:flex"><Radio size={11}/>Voice reconnecting</span>}{newCallToast&&<span className="hidden rounded-full bg-green-600 px-3 py-1 text-xs font-semibold text-white sm:flex">New voice call received</span>}<span className="hidden text-xs text-gray-400 sm:block">{secondsAgo<5?'Just updated':`Updated ${secondsAgo}s ago`}</span><button onClick={handleManualRefresh} title="Refresh data" className={`rounded-lg p-2 text-gray-400 hover:bg-gray-50 hover:text-green-700 ${refreshing?'animate-spin text-green-600':''}`}><RefreshCw size={16}/></button><button className="rounded-lg p-2 text-gray-400 hover:bg-gray-50"><Bell size={16}/></button><button className="rounded-lg p-2 text-gray-400 hover:bg-gray-50"><Settings size={16}/></button><button className="flex items-center gap-2 rounded-lg bg-green-600 px-3 py-2 text-sm font-medium text-white hover:bg-green-700"><Download size={14}/>Export</button></div></header><main className="flex-1 overflow-y-auto bg-gray-50 p-4 sm:p-6"><Outlet/></main></div></div></div>
 }
