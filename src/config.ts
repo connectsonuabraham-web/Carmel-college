@@ -9,5 +9,5 @@ export const API_BASE_PATH = `${CONFIG.ORG_ID}/${CONFIG.WORKSPACE_ID}/${CONFIG.A
 
 export const SETSMART_CONFIG = {
   BASE_URL: '/api/setsmart',
-  CLIENT_ID: 'sonuabraham0',
+  CLIENT_ID: 'sonh45295',
 } as const

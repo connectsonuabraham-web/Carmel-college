@@ -252,13 +252,15 @@ app.all('/api-proxy/*',     (req, res) => sarvamFetchProxy(req, res, SARVAM_ANAL
 // SetSmart WhatsApp Agent proxy — /api/setsmart/* → https://setsmart.io/api/*
 app.all('/api/setsmart/*', async (req, res) => {
   try {
+    const ssKey      = process.env.SETSMART_API_KEY    || '3c13a3b6-d7cc-422f-8326-0d814b8a3b9c'
+    const ssClientId = process.env.SETSMART_CLIENT_ID  || 'sonh45295'
     const suffix = req.originalUrl.replace(/^\/api\/setsmart/, '')
     const sep = suffix.includes('?') ? '&' : '?'
-    const targetUrl = `https://setsmart.io/api${suffix}${sep}clientId=sonuabraham0`
+    const targetUrl = `https://setsmart.io/api${suffix}${sep}clientId=${ssClientId}`
     console.log('[setsmart] ' + req.method + ' ' + targetUrl)
     const upstream = await fetch(targetUrl, {
       method: req.method,
-      headers: { 'x-api-key': '8444ca5e-654b-4a10-913f-4fc6485c2d7c', 'Content-Type': 'application/json', 'Accept': 'application/json' },
+      headers: { 'x-api-key': ssKey, 'Content-Type': 'application/json', 'Accept': 'application/json' },
       body: ['GET','HEAD'].includes(req.method) ? undefined : JSON.stringify(req.body),
     })
     const text = await upstream.text()
