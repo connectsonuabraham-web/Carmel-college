@@ -58,37 +58,37 @@ function WhatsAppQuickSection() {
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
-      <div className="bg-[#1a1d2e] rounded-xl border border-white/[0.06] p-5">
+      <div className="bg-white rounded-\[16px\] border border-\[#e8ebe8\] p-5">
         <div className="flex items-center justify-between mb-4">
-          <h3 className="text-sm font-semibold text-[#f1f5f9] flex items-center gap-2">
+          <h3 className="text-sm font-semibold text-\[#0f1a14\] flex items-center gap-2">
             <MessageCircle size={15} className="text-green-500" /> Recent WhatsApp Conversations
           </h3>
           <a href="/whatsapp/conversations" className="text-xs text-green-500 hover:underline">View All →</a>
         </div>
         {recentConvs.length === 0 ? (
-          <p className="text-xs text-[#475569] text-center py-4">No WhatsApp conversations yet</p>
+          <p className="text-xs text-\[#7b857f\] text-center py-4">No WhatsApp conversations yet</p>
         ) : (
           <div className="space-y-3">
             {recentConvs.map((conv, i) => {
               const name = conv.contact.name || 'Unknown'
               const status = conv.qualification.status || 'New'
               const statusMap: Record<string, string> = {
-                Qualified: 'bg-green-500/10 text-green-400',
+                Qualified: 'bg-\[#d8f58f\]/60 text-\[#1f6b47\]',
                 Booked: 'bg-blue-500/10 text-blue-400',
-                Open: 'bg-white/[0.04] text-[#94a3b8]',
-                New: 'bg-amber-500/10 text-amber-400',
+                Open: 'bg-\[#f5f6f4\] text-\[#7b857f\]',
+                New: 'bg-orange-50 text-\[#f0883e\]',
               }
               return (
                 <div key={i} className="flex items-center gap-3 py-1">
-                  <div className="w-8 h-8 rounded-full bg-green-500/10 flex items-center justify-center flex-shrink-0">
-                    <span className="text-green-400 text-[10px] font-bold">{name.slice(0, 2).toUpperCase()}</span>
+                  <div className="w-8 h-8 rounded-full bg-\[#d8f58f\]/60 flex items-center justify-center flex-shrink-0">
+                    <span className="text-\[#1f6b47\] text-[10px] font-bold">{name.slice(0, 2).toUpperCase()}</span>
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className="text-xs font-medium text-[#f1f5f9] truncate">{name}</p>
-                    <p className="text-[10px] text-[#475569] truncate">{conv.messages[conv.messages.length - 1]?.content ?? '—'}</p>
+                    <p className="text-xs font-medium text-\[#0f1a14\] truncate">{name}</p>
+                    <p className="text-[10px] text-\[#7b857f\] truncate">{conv.messages[conv.messages.length - 1]?.content ?? '—'}</p>
                   </div>
                   <div className="flex items-center gap-1.5">
-                    <span className={`text-[10px] px-1.5 py-0.5 rounded-full font-medium ${statusMap[status] ?? 'bg-white/[0.04] text-[#94a3b8]'}`}>{status}</span>
+                    <span className={`text-[10px] px-1.5 py-0.5 rounded-full font-medium ${statusMap[status] ?? 'bg-\[#f5f6f4\] text-\[#7b857f\]'}`}>{status}</span>
                   </div>
                 </div>
               )
@@ -96,16 +96,16 @@ function WhatsAppQuickSection() {
           </div>
         )}
       </div>
-      <div className="bg-[#1a1d2e] rounded-xl border border-white/[0.06] p-5">
-        <h3 className="text-sm font-semibold text-[#f1f5f9] mb-4 flex items-center gap-2">
+      <div className="bg-white rounded-\[16px\] border border-\[#e8ebe8\] p-5">
+        <h3 className="text-sm font-semibold text-\[#0f1a14\] mb-4 flex items-center gap-2">
           <BarChart3 size={15} className="text-green-500" /> WhatsApp Summary
         </h3>
         <div className="grid grid-cols-2 gap-4">
-          <div><p className="text-2xl font-bold text-[#f1f5f9]">{totalConversations}</p><p className="text-xs text-[#475569]">Total Conversations</p></div>
-          <div><p className="text-2xl font-bold text-[#f1f5f9]">{leads.length}</p><p className="text-xs text-[#475569]">Total Leads</p></div>
-          <div><p className="text-2xl font-bold text-[#f1f5f9]">{bookedLeads}</p><p className="text-xs text-[#475569]">Booked Leads</p></div>
-          <div><p className="text-2xl font-bold text-[#f1f5f9]">{aiActive}</p><p className="text-xs text-[#475569]">AI Active</p></div>
-          <div className="col-span-2"><p className="text-2xl font-bold text-[#f1f5f9]">{totalMessages}</p><p className="text-xs text-[#475569]">Total Messages</p></div>
+          <div><p className="text-2xl font-bold text-\[#0f1a14\]">{totalConversations}</p><p className="text-xs text-\[#7b857f\]">Total Conversations</p></div>
+          <div><p className="text-2xl font-bold text-\[#0f1a14\]">{leads.length}</p><p className="text-xs text-\[#7b857f\]">Total Leads</p></div>
+          <div><p className="text-2xl font-bold text-\[#0f1a14\]">{bookedLeads}</p><p className="text-xs text-\[#7b857f\]">Booked Leads</p></div>
+          <div><p className="text-2xl font-bold text-\[#0f1a14\]">{aiActive}</p><p className="text-xs text-\[#7b857f\]">AI Active</p></div>
+          <div className="col-span-2"><p className="text-2xl font-bold text-\[#0f1a14\]">{totalMessages}</p><p className="text-xs text-\[#7b857f\]">Total Messages</p></div>
         </div>
       </div>
     </div>
@@ -246,13 +246,13 @@ export function OverviewPage() {
       {/* Header */}
       <div className="flex flex-wrap gap-4 items-start justify-between">
         <div>
-          <h1 className="text-xl font-semibold text-[#f1f5f9]">Dashboard</h1>
-          <p className="text-sm text-[#475569] mt-0.5">Track your calls and agent performance — Carmel College of Nursing</p>
+          <h1 className="text-xl font-semibold text-\[#0f1a14\]">Dashboard</h1>
+          <p className="text-sm text-\[#7b857f\] mt-0.5">Track your calls and agent performance — Carmel College of Nursing</p>
         </div>
         <div className="flex items-center gap-3">
-          {isFetching && <span className="text-xs text-green-600 animate-pulse font-medium">Refreshing…</span>}
+          {isFetching && <span className="text-xs text-\[#1f6b47\] animate-pulse font-medium">Refreshing…</span>}
           {stats.usingWebhookData && webhookCalls.length > 0 && (
-            <span className="text-xs bg-green-500/10 text-green-400 px-2 py-1 rounded-full font-medium">
+            <span className="text-xs bg-\[#d8f58f\]/60 text-\[#1f6b47\] px-2 py-1 rounded-full font-medium">
               ⚡ Live data
             </span>
           )}
@@ -322,29 +322,29 @@ export function OverviewPage() {
 
       {/* Charts */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
-        <div className="lg:col-span-2 bg-[#1a1d2e] rounded-xl border border-white/[0.06] p-5">
+        <div className="lg:col-span-2 bg-white rounded-\[16px\] border border-\[#e8ebe8\] p-5">
           <div className="flex items-center justify-between mb-4">
-            <h3 className="text-sm font-semibold text-[#f1f5f9]">Calls Per Day</h3>
-            <span className="text-xs text-[#475569]">Last {callsPerDay.length} days</span>
+            <h3 className="text-sm font-semibold text-\[#0f1a14\]">Calls Per Day</h3>
+            <span className="text-xs text-\[#7b857f\]">Last {callsPerDay.length} days</span>
           </div>
           <CallsPerDayChart data={callsPerDay} />
         </div>
-        <div className="bg-[#1a1d2e] rounded-xl border border-white/[0.06] p-5 flex flex-col items-center justify-center">
-          <h3 className="text-sm font-semibold text-[#f1f5f9] self-start mb-3">Call Performance</h3>
+        <div className="bg-white rounded-\[16px\] border border-\[#e8ebe8\] p-5 flex flex-col items-center justify-center">
+          <h3 className="text-sm font-semibold text-\[#0f1a14\] self-start mb-3">Call Performance</h3>
           <RadialBarChart width={140} height={140} cx={70} cy={70} innerRadius={45} outerRadius={65}
             data={[{ value: parseFloat(stats.successRate), fill: '#4CAF50' }]} startAngle={180} endAngle={-180}>
             <RadialBar dataKey="value" cornerRadius={6} background={{ fill: '#e8f5e9' }} />
           </RadialBarChart>
-          <p className="-mt-4 text-3xl font-bold text-[#f1f5f9]">{stats.successRate}%</p>
-          <p className="text-xs text-[#475569] mt-1">Goal Success Rate</p>
+          <p className="-mt-4 text-3xl font-bold text-\[#0f1a14\]">{stats.successRate}%</p>
+          <p className="text-xs text-\[#7b857f\] mt-1">Goal Success Rate</p>
           <div className="grid grid-cols-2 gap-3 mt-4 w-full text-center">
             <div>
-              <p className="text-lg font-bold text-[#f1f5f9]">{stats.totalInteractions}</p>
-              <p className="text-xs text-[#475569]">Total Calls</p>
+              <p className="text-lg font-bold text-\[#0f1a14\]">{stats.totalInteractions}</p>
+              <p className="text-xs text-\[#7b857f\]">Total Calls</p>
             </div>
             <div>
-              <p className="text-lg font-bold text-[#f1f5f9]">{formatDuration(stats.avgDuration)}</p>
-              <p className="text-xs text-[#475569]">Avg Duration</p>
+              <p className="text-lg font-bold text-\[#0f1a14\]">{formatDuration(stats.avgDuration)}</p>
+              <p className="text-xs text-\[#7b857f\]">Avg Duration</p>
             </div>
           </div>
         </div>
@@ -352,19 +352,19 @@ export function OverviewPage() {
 
       {/* Breakdown charts */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
-        <div className="bg-[#1a1d2e] rounded-xl border border-white/[0.06] p-5">
-          <h3 className="text-sm font-semibold text-[#f1f5f9] mb-3">End Reason / Disposition</h3>
-          {endReasonData.length > 0 ? <EndReasonChart data={endReasonData} /> : <p className="text-sm text-[#475569] py-8 text-center">No data yet</p>}
+        <div className="bg-white rounded-\[16px\] border border-\[#e8ebe8\] p-5">
+          <h3 className="text-sm font-semibold text-\[#0f1a14\] mb-3">End Reason / Disposition</h3>
+          {endReasonData.length > 0 ? <EndReasonChart data={endReasonData} /> : <p className="text-sm text-\[#7b857f\] py-8 text-center">No data yet</p>}
         </div>
-        <div className="bg-[#1a1d2e] rounded-xl border border-white/[0.06] p-5">
-          <h3 className="text-sm font-semibold text-[#f1f5f9] mb-3">Goal Status</h3>
+        <div className="bg-white rounded-\[16px\] border border-\[#e8ebe8\] p-5">
+          <h3 className="text-sm font-semibold text-\[#0f1a14\] mb-3">Goal Status</h3>
           {goalStatusData.length > 0 ? <GoalStatusChart data={goalStatusData} /> : (
             dispositionData.length > 0 ? <GoalStatusChart data={dispositionData} /> :
-            <p className="text-sm text-[#475569] py-8 text-center">No data yet</p>
+            <p className="text-sm text-\[#7b857f\] py-8 text-center">No data yet</p>
           )}
         </div>
-        <div className="bg-[#1a1d2e] rounded-xl border border-white/[0.06] p-5">
-          <h3 className="text-sm font-semibold text-[#f1f5f9] mb-3">Call Disposition</h3>
+        <div className="bg-white rounded-\[16px\] border border-\[#e8ebe8\] p-5">
+          <h3 className="text-sm font-semibold text-\[#0f1a14\] mb-3">Call Disposition</h3>
           {dispositionData.length > 0 ? (
             <ResponsiveContainer width="100%" height={200}>
               <PieChart>
@@ -375,28 +375,28 @@ export function OverviewPage() {
                 <Legend />
               </PieChart>
             </ResponsiveContainer>
-          ) : <p className="text-sm text-[#475569] py-8 text-center">No data yet</p>}
+          ) : <p className="text-sm text-\[#7b857f\] py-8 text-center">No data yet</p>}
         </div>
       </div>
 
       {/* Heatmap */}
-      <div className="bg-[#1a1d2e] rounded-xl border border-white/[0.06] p-5">
-        <h3 className="text-sm font-semibold text-[#f1f5f9] mb-4">Call Activity</h3>
+      <div className="bg-white rounded-\[16px\] border border-\[#e8ebe8\] p-5">
+        <h3 className="text-sm font-semibold text-\[#0f1a14\] mb-4">Call Activity</h3>
         <div className="flex flex-wrap gap-1">
           {callsPerDay.map((d, i) => {
             const maxCount = Math.max(...callsPerDay.map(x => x.count), 1)
             const intensity = d.count === 0 ? 0 : Math.ceil((d.count / maxCount) * 6)
-            const bgColors = ['bg-white/[0.04]','bg-green-500/10','bg-green-500/20','bg-green-500/40','bg-green-500/60','bg-green-500','bg-green-700']
+            const bgColors = ['bg-\[#f5f6f4\]','bg-\[#d8f58f\]/60','bg-\[#a6e22e\]/20','bg-\[#a6e22e\]/40','bg-\[#a6e22e\]/60','bg-\[#a6e22e\]','bg-green-700']
             return <div key={i} title={`${d.date}: ${d.count} calls`}
               className={`w-6 h-6 rounded-sm ${bgColors[intensity]} cursor-pointer hover:ring-2 hover:ring-green-400`} />
           })}
         </div>
         <div className="flex items-center gap-2 mt-3">
-          <span className="text-xs text-[#475569]">Less</span>
-          {['bg-white/[0.04]','bg-green-500/10','bg-green-500/20','bg-green-500/40','bg-green-600'].map((c,i) => (
+          <span className="text-xs text-\[#7b857f\]">Less</span>
+          {['bg-\[#f5f6f4\]','bg-\[#d8f58f\]/60','bg-\[#a6e22e\]/20','bg-\[#a6e22e\]/40','bg-\[#1f6b47\]'].map((c,i) => (
             <div key={i} className={`w-4 h-4 rounded-sm ${c}`} />
           ))}
-          <span className="text-xs text-[#475569]">More</span>
+          <span className="text-xs text-\[#7b857f\]">More</span>
         </div>
       </div>
 

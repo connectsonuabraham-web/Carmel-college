@@ -1,26 +1,18 @@
 import React from 'react'
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts'
 
-interface Props {
-  data: { name: string; count: number }[]
-}
+interface Props { data: { name: string; value: number }[] }
 
 export function LanguageChart({ data }: Props) {
   return (
-    <div className="w-full h-48">
-      <ResponsiveContainer width="100%" height="100%">
-        <BarChart data={data} layout="vertical" margin={{top: 5, right: 20, left: 60, bottom: 5}}>
-          <CartesianGrid stroke="rgba(255,255,255,0.04)" strokeDasharray="3 3" />
-          <XAxis type="number" tick={{fill: '#475569', fontSize: 11}} axisLine={{stroke: 'rgba(255,255,255,0.06)'}} tickLine={false} />
-          <YAxis dataKey="name" type="category" tick={{fill: '#475569', fontSize: 11}} axisLine={{stroke: 'rgba(255,255,255,0.06)'}} tickLine={false} />
-          <Tooltip
-            contentStyle={{backgroundColor: '#1a1d2e', border: '1px solid rgba(255,255,255,0.08)', borderRadius: '8px', color: '#f1f5f9', fontSize: 12}}
-            labelStyle={{color: '#94a3b8'}}
-            itemStyle={{color: '#f1f5f9'}}
-          />
-          <Bar dataKey="count" name="Calls" fill="#22c55e" radius={[0, 4, 4, 0]} />
-        </BarChart>
-      </ResponsiveContainer>
-    </div>
+    <ResponsiveContainer width="100%" height={190}>
+      <BarChart data={data} margin={{top:5,right:10,left:-10,bottom:5}}>
+        <CartesianGrid stroke="#e8ebe8" strokeDasharray="3 3" vertical={false} />
+        <XAxis dataKey="name" tick={{fill:'#7b857f',fontSize:11}} axisLine={false} tickLine={false} />
+        <YAxis tick={{fill:'#7b857f',fontSize:11}} axisLine={false} tickLine={false} />
+        <Tooltip contentStyle={{background:'#fff',border:'1px solid #e8ebe8',borderRadius:10,fontSize:12}} cursor={{fill:'#f5f6f4'}} />
+        <Bar dataKey="value" name="Calls" fill="#1f6b47" radius={[5,5,0,0]} />
+      </BarChart>
+    </ResponsiveContainer>
   )
 }

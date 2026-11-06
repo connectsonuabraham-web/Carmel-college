@@ -1,14 +1,28 @@
+/** @type {import('tailwindcss').Config} */
 module.exports = {
   content: ['./index.html', './src/**/*.{js,ts,jsx,tsx}'],
   theme: {
     extend: {
-      colors: {
-        surface: { DEFAULT: '#1a1d2e', secondary: '#222538', border: 'rgba(255,255,255,0.06)' },
-        base: '#0f1117',
-        accent: '#22c55e',
+      fontFamily: {
+        sans: ['Plus Jakarta Sans', '-apple-system', 'Segoe UI', 'sans-serif'],
       },
-      borderRadius: { card: '12px' },
-      boxShadow: { card: 'none' },
+      colors: {
+        g9:    '#0b3322',
+        g8:    '#124530',
+        g6:    '#1f6b47',
+        lime:  '#a6e22e',
+        lime2: '#d8f58f',
+        ink:   '#0f1a14',
+        mut:   '#7b857f',
+        line:  '#e8ebe8',
+        soft:  '#f5f6f4',
+        org:   '#f0883e',
+        danger:'#d9534f',
+      },
+      borderRadius: {
+        card: '20px',
+        pill: '99px',
+      },
     }
   },
   plugins: []

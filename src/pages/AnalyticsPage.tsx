@@ -21,7 +21,7 @@ export function AnalyticsPage() {
   const languageData = useMemo(() => {
     const map: Record<string, number> = {}
     interactions.forEach((i) => { if (i.language_name) map[i.language_name] = (map[i.language_name] ?? 0) + 1 })
-    return Object.entries(map).map(([name, count]) => ({ name, count })).sort((a, b) => b.count - a.count)
+    return Object.entries(map).map(([name, count]) => ({ name, value: count })).sort((a, b) => b.value - a.value)
   }, [interactions])
 
   const hourlyData = useMemo(() => {
@@ -37,7 +37,7 @@ export function AnalyticsPage() {
   const failureData = useMemo(() => {
     const map: Record<string, number> = {}
     attempts.forEach((a) => { if (a.failure_reason) map[a.failure_reason] = (map[a.failure_reason] ?? 0) + 1 })
-    return Object.entries(map).map(([name, count]) => ({ name, count })).sort((a, b) => b.count - a.count).slice(0, 10)
+    return Object.entries(map).map(([name, count]) => ({ name, value: count })).sort((a, b) => b.value - a.value).slice(0, 10)
   }, [attempts])
 
   const directionData = useMemo(() => {
@@ -53,8 +53,8 @@ export function AnalyticsPage() {
   }, [interactions])
 
   const ChartCard = ({ title, children }: { title: string; children: React.ReactNode }) => (
-    <div className="bg-[#1a1d2e] rounded-xl border border-white/[0.06] p-5">
-      <h3 className="text-sm font-semibold text-[#f1f5f9] mb-3">{title}</h3>
+    <div className="bg-white rounded-\[16px\] border border-\[#e8ebe8\] p-5">
+      <h3 className="text-sm font-semibold text-\[#0f1a14\] mb-3">{title}</h3>
       {children}
     </div>
   )
@@ -62,25 +62,25 @@ export function AnalyticsPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-xl font-semibold text-[#f1f5f9]">Analytics</h1>
-        <p className="text-sm text-[#475569] mt-0.5">Detailed breakdown of agent performance</p>
+        <h1 className="text-xl font-semibold text-\[#0f1a14\]">Analytics</h1>
+        <p className="text-sm text-\[#7b857f\] mt-0.5">Detailed breakdown of agent performance</p>
       </div>
       <DateRangePicker value={dateRange} onChange={setDateRange} />
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <ChartCard title="Calls by Language">
-          {languageData.length > 0 ? <LanguageChart data={languageData} /> : <p className="text-sm text-[#475569] py-8 text-center">No data</p>}
+          {languageData.length > 0 ? <LanguageChart data={languageData} /> : <p className="text-sm text-\[#7b857f\] py-8 text-center">No data</p>}
         </ChartCard>
         <ChartCard title="Hourly Call Distribution">
           <HourlyChart data={hourlyData} />
         </ChartCard>
         <ChartCard title="Calls by Direction">
-          {directionData.length > 0 ? <EndReasonChart data={directionData} /> : <p className="text-sm text-[#475569] py-8 text-center">No data</p>}
+          {directionData.length > 0 ? <EndReasonChart data={directionData} /> : <p className="text-sm text-\[#7b857f\] py-8 text-center">No data</p>}
         </ChartCard>
         <ChartCard title="Goal Success Rate">
-          {goalData.length > 0 ? <GoalStatusChart data={goalData} /> : <p className="text-sm text-[#475569] py-8 text-center">No data</p>}
+          {goalData.length > 0 ? <GoalStatusChart data={goalData} /> : <p className="text-sm text-\[#7b857f\] py-8 text-center">No data</p>}
         </ChartCard>
         <ChartCard title="Top Failure Reasons">
-          {failureData.length > 0 ? <FailureReasonsChart data={failureData} /> : <p className="text-sm text-[#475569] py-8 text-center">No failure data</p>}
+          {failureData.length > 0 ? <FailureReasonsChart data={failureData} /> : <p className="text-sm text-\[#7b857f\] py-8 text-center">No failure data</p>}
         </ChartCard>
       </div>
     </div>

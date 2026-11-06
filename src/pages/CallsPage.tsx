@@ -123,44 +123,44 @@ export function CallsPage() {
 
   const activeFilterCount = Object.values(advFilters).filter((v) => v !== '').length
 
-  const selectClass = 'rounded-lg border border-white/[0.08] bg-[#1a1d2e] px-2 py-1.5 text-xs text-[#94a3b8] focus:outline-none focus:ring-2 focus:ring-green-300 focus:border-green-400 min-w-[120px]'
-  const inputClass  = 'rounded-lg border border-white/[0.08] bg-[#1a1d2e] px-2 py-1.5 text-xs text-[#94a3b8] placeholder-[#475569] focus:outline-none focus:ring-2 focus:ring-green-300 focus:border-green-400 w-24'
+  const selectClass = 'rounded-lg border border-\[#e8ebe8\] bg-white px-2 py-1.5 text-xs text-\[#7b857f\] focus:outline-none focus:ring-2 focus:ring-\[#a6e22e\] focus:border-\[#1f6b47\] min-w-[120px]'
+  const inputClass  = 'rounded-lg border border-\[#e8ebe8\] bg-white px-2 py-1.5 text-xs text-\[#7b857f\] placeholder-[#475569] focus:outline-none focus:ring-2 focus:ring-\[#a6e22e\] focus:border-\[#1f6b47\] w-24'
 
   return (
     <div className="space-y-5">
       <div className="flex flex-wrap gap-4 items-start justify-between">
         <div>
-          <h1 className="text-xl font-semibold text-[#f1f5f9]">Call Logs</h1>
-          <p className="text-sm text-[#475569] mt-0.5">
+          <h1 className="text-xl font-semibold text-\[#0f1a14\]">Call Logs</h1>
+          <p className="text-sm text-\[#7b857f\] mt-0.5">
             {(data?.total ?? webhookData?.total ?? 0)} total interactions · click a row to view transcript, recording &amp; log analyser
             {sarvamInteractions.length === 0 && webhookInteractions.length > 0 && (
-              <span className="ml-2 text-xs text-green-600 font-medium">⚡ showing live webhook data</span>
+              <span className="ml-2 text-xs text-\[#1f6b47\] font-medium">⚡ showing live webhook data</span>
             )}
           </p>
         </div>
-        {isFetching && <span className="text-xs text-green-600 animate-pulse font-medium">Refreshing…</span>}
+        {isFetching && <span className="text-xs text-\[#1f6b47\] animate-pulse font-medium">Refreshing…</span>}
       </div>
 
       <DateRangePicker value={dateRange} onChange={setDateRange} />
 
       {/* Advanced Filters */}
-      <div className="rounded-xl border border-white/[0.06] bg-[#1a1d2e]">
+      <div className="rounded-\[16px\] border border-\[#e8ebe8\] bg-white">
         <button
-          className="w-full flex items-center justify-between px-4 py-3 text-sm font-medium text-[#94a3b8]"
+          className="w-full flex items-center justify-between px-4 py-3 text-sm font-medium text-\[#7b857f\]"
           onClick={() => setShowAdvanced(!showAdvanced)}
         >
           <span className="flex items-center gap-2">
             <Filter size={15} />
             Advanced Filters
             {activeFilterCount > 0 && (
-              <span className="ml-1 bg-green-600 text-white text-xs rounded-full px-1.5 py-0.5">{activeFilterCount}</span>
+              <span className="ml-1 bg-\[#1f6b47\] text-white text-xs rounded-full px-1.5 py-0.5">{activeFilterCount}</span>
             )}
           </span>
           {showAdvanced ? <ChevronUp size={15} /> : <ChevronDown size={15} />}
         </button>
 
         {showAdvanced && (
-          <div className="px-4 pb-4 border-t border-white/[0.06] pt-3">
+          <div className="px-4 pb-4 border-t border-\[#e8ebe8\] pt-3">
             <div className="flex flex-wrap gap-3">
               {[
                 { label: 'Language',    key: 'language_name',      opts: getUniqueValues(allInteractions, 'language_name') },
@@ -171,7 +171,7 @@ export function CallsPage() {
                 { label: 'Channel Type',key: 'channel_type',       opts: getUniqueValues(allInteractions, 'channel_type') },
               ].map(({ label, key, opts }) => (
                 <div key={key} className="flex flex-col gap-1">
-                  <label className="text-xs text-[#475569]">{label}</label>
+                  <label className="text-xs text-\[#7b857f\]">{label}</label>
                   <select value={(advFilters as Record<string, string>)[key]} onChange={(e) => updateFilter(key as keyof AdvancedFilter, e.target.value)} className={selectClass}>
                     <option value="">All</option>
                     {opts.map((v) => <option key={v} value={v}>{v}</option>)}
@@ -179,7 +179,7 @@ export function CallsPage() {
                 </div>
               ))}
               <div className="flex flex-col gap-1">
-                <label className="text-xs text-[#475569]">Direction</label>
+                <label className="text-xs text-\[#7b857f\]">Direction</label>
                 <select value={advFilters.channel_direction} onChange={(e) => updateFilter('channel_direction', e.target.value)} className={selectClass}>
                   <option value="">All</option>
                   <option value="inbound">Inbound</option>
@@ -193,7 +193,7 @@ export function CallsPage() {
                 { label: 'Max Turns',        key: 'num_messages_max', ph: '20' },
               ].map(({ label, key, ph }) => (
                 <div key={key} className="flex flex-col gap-1">
-                  <label className="text-xs text-[#475569]">{label}</label>
+                  <label className="text-xs text-\[#7b857f\]">{label}</label>
                   <input type="number" placeholder={ph} value={(advFilters as Record<string, string>)[key]} onChange={(e) => updateFilter(key as keyof AdvancedFilter, e.target.value)} className={inputClass} />
                 </div>
               ))}
@@ -202,7 +202,7 @@ export function CallsPage() {
                 { label: 'Has Log Issues',key: 'has_log_issues' },
               ].map(({ label, key }) => (
                 <div key={key} className="flex flex-col gap-1">
-                  <label className="text-xs text-[#475569]">{label}</label>
+                  <label className="text-xs text-\[#7b857f\]">{label}</label>
                   <select value={(advFilters as Record<string, string>)[key]} onChange={(e) => updateFilter(key as keyof AdvancedFilter, e.target.value)} className={selectClass}>
                     <option value="">All</option>
                     <option value="true">Yes</option>
@@ -212,7 +212,7 @@ export function CallsPage() {
               ))}
             </div>
             {activeFilterCount > 0 && (
-              <button onClick={clearFilters} className="mt-3 text-xs text-red-400 hover:text-red-300 underline">
+              <button onClick={clearFilters} className="mt-3 text-xs text-\[#d9534f\] hover:text-red-300 underline">
                 Clear all filters ({activeFilterCount})
               </button>
             )}

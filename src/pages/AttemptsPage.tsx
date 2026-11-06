@@ -17,11 +17,11 @@ export function AttemptsPage() {
     <div className="space-y-5">
       <div className="flex flex-wrap gap-4 items-start justify-between">
         <div>
-          <h1 className="text-xl font-semibold text-[#f1f5f9]">Attempts</h1>
-          <p className="text-sm text-[#475569] mt-0.5">{data?.total ?? 0} attempts · {rate}% connection rate</p>
+          <h1 className="text-xl font-semibold text-\[#0f1a14\]">Attempts</h1>
+          <p className="text-sm text-\[#7b857f\] mt-0.5">{data?.total ?? 0} attempts · {rate}% connection rate</p>
         </div>
         <div className="flex items-center gap-3">
-          {isFetching && <span className="text-xs text-green-600 animate-pulse font-medium">Refreshing…</span>}
+          {isFetching && <span className="text-xs text-\[#1f6b47\] animate-pulse font-medium">Refreshing…</span>}
         </div>
       </div>
       <DateRangePicker value={dateRange} onChange={setDateRange} />

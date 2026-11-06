@@ -46,12 +46,12 @@ export function BoardsPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-xl font-semibold text-[#f1f5f9]">Boards</h1>
-        <p className="text-sm text-[#475569] mt-0.5">Analytics boards and widget dashboards</p>
+        <h1 className="text-xl font-semibold text-\[#0f1a14\]">Boards</h1>
+        <p className="text-sm text-\[#7b857f\] mt-0.5">Analytics boards and widget dashboards</p>
       </div>
 
       {boardsError && (
-        <div className="rounded-xl border border-red-500/20 bg-red-500/10 p-4 text-sm text-red-400">
+        <div className="rounded-\[16px\] border border-red-500/20 bg-red-50 p-4 text-sm text-\[#d9534f\]">
           Failed to load boards. The boards API may not be available for this workspace.
         </div>
       )}
@@ -59,24 +59,24 @@ export function BoardsPage() {
       <div className="flex gap-4 min-h-[500px]">
         {/* Board list sidebar */}
         <div className="w-56 flex-shrink-0">
-          <div className="rounded-xl border border-white/[0.06] bg-[#1a1d2e] overflow-hidden">
-            <div className="px-4 py-3 border-b border-white/[0.06]">
-              <p className="text-[10px] uppercase tracking-widest font-semibold text-[#475569]">Boards</p>
+          <div className="rounded-\[16px\] border border-\[#e8ebe8\] bg-white overflow-hidden">
+            <div className="px-4 py-3 border-b border-\[#e8ebe8\]">
+              <p className="text-[10px] uppercase tracking-widest font-semibold text-\[#7b857f\]">Boards</p>
             </div>
             {boardsLoading && (
               <div className="flex justify-center py-8">
                 <Loader2 className="animate-spin text-green-500" size={20} />
               </div>
             )}
-            <div className="divide-y divide-white/[0.05]">
+            <div className="divide-y divide-\[#e8ebe8\]">
               {(boards ?? []).map((b) => (
                 <button
                   key={b.id}
                   onClick={() => handleSelectBoard(b.id)}
                   className={`w-full text-left px-4 py-3 text-sm flex items-center justify-between transition-colors ${
                     selectedBoardId === b.id
-                      ? 'bg-green-500/10 text-green-400 font-medium'
-                      : 'text-[#94a3b8] hover:bg-white/[0.03]'
+                      ? 'bg-\[#d8f58f\]/60 text-\[#1f6b47\] font-medium'
+                      : 'text-\[#7b857f\] hover:bg-\[#f5f6f4\]'
                   }`}
                 >
                   <div className="flex items-center gap-2 min-w-0">
@@ -87,7 +87,7 @@ export function BoardsPage() {
                 </button>
               ))}
               {!boardsLoading && (boards ?? []).length === 0 && !boardsError && (
-                <p className="px-4 py-6 text-sm text-[#475569] text-center">No boards found</p>
+                <p className="px-4 py-6 text-sm text-\[#7b857f\] text-center">No boards found</p>
               )}
             </div>
           </div>
@@ -96,8 +96,8 @@ export function BoardsPage() {
         {/* Board content */}
         <div className="flex-1 min-w-0">
           {!selectedBoardId && (
-            <div className="bg-[#1a1d2e] rounded-xl border border-white/[0.06] p-8 flex items-center justify-center">
-              <p className="text-sm text-[#475569]">Select a board to view its tabs and widgets</p>
+            <div className="bg-white rounded-\[16px\] border border-\[#e8ebe8\] p-8 flex items-center justify-center">
+              <p className="text-sm text-\[#7b857f\]">Select a board to view its tabs and widgets</p>
             </div>
           )}
 
@@ -111,8 +111,8 @@ export function BoardsPage() {
                     onClick={() => setSelectedTabId(tab.id)}
                     className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
                       selectedTabId === tab.id
-                        ? 'bg-green-600 text-white'
-                        : 'bg-[#1a1d2e] border border-white/[0.08] text-[#94a3b8] hover:bg-white/[0.04]'
+                        ? 'bg-\[#1f6b47\] text-white'
+                        : 'bg-white border border-\[#e8ebe8\] text-\[#7b857f\] hover:bg-\[#f5f6f4\]'
                     }`}
                   >
                     {tab.name}
@@ -122,13 +122,13 @@ export function BoardsPage() {
 
               {/* Selected tab content */}
               {currentTab && (
-                <div className="bg-[#1a1d2e] rounded-xl border border-white/[0.06] p-5">
+                <div className="bg-white rounded-\[16px\] border border-\[#e8ebe8\] p-5">
                   <div className="flex items-center justify-between mb-4">
-                    <h3 className="font-semibold text-[#f1f5f9]">{currentTab.name}</h3>
+                    <h3 className="font-semibold text-\[#0f1a14\]">{currentTab.name}</h3>
                     <button
                       onClick={() => handleRunTab(currentTab)}
                       disabled={runTab.isPending}
-                      className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-green-600 text-white text-sm hover:bg-green-700 disabled:opacity-50 transition-colors"
+                      className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-\[#1f6b47\] text-white text-sm hover:bg-green-700 disabled:opacity-50 transition-colors"
                     >
                       {runTab.isPending ? <Loader2 size={14} className="animate-spin" /> : <Play size={14} />}
                       Run Tab
@@ -138,18 +138,18 @@ export function BoardsPage() {
                   {/* Widgets list */}
                   {!currentResults && (
                     <div className="space-y-2">
-                      <p className="text-xs text-[#475569] mb-3">Widgets in this tab ({currentTab.widgets.length}):</p>
+                      <p className="text-xs text-\[#7b857f\] mb-3">Widgets in this tab ({currentTab.widgets.length}):</p>
                       {currentTab.widgets.map((w) => (
                         <div
                           key={w.id}
-                          className="flex items-center gap-3 px-3 py-2 rounded-lg bg-white/[0.04] text-sm text-[#94a3b8]"
+                          className="flex items-center gap-3 px-3 py-2 rounded-lg bg-\[#f5f6f4\] text-sm text-\[#7b857f\]"
                         >
-                          <LayoutGrid size={14} className="text-[#475569]" />
+                          <LayoutGrid size={14} className="text-\[#7b857f\]" />
                           {w.name}
                         </div>
                       ))}
                       {currentTab.widgets.length === 0 && (
-                        <p className="text-sm text-[#475569]">No widgets in this tab</p>
+                        <p className="text-sm text-\[#7b857f\]">No widgets in this tab</p>
                       )}
                     </div>
                   )}
@@ -162,40 +162,40 @@ export function BoardsPage() {
                         return (
                           <div key={result.widget_id}>
                             <div className="flex items-center gap-2 mb-2">
-                              <h4 className="text-sm font-semibold text-[#94a3b8]">
+                              <h4 className="text-sm font-semibold text-\[#7b857f\]">
                                 {widget?.name ?? result.widget_id}
                               </h4>
                               {result.truncated && (
-                                <span className="flex items-center gap-1 text-xs text-amber-400">
+                                <span className="flex items-center gap-1 text-xs text-\[#f0883e\]">
                                   <AlertTriangle size={12} /> Truncated
                                 </span>
                               )}
                               {result.status === 'error' && (
-                                <span className="text-xs text-red-400">
+                                <span className="text-xs text-\[#d9534f\]">
                                   Error: {result.error?.message ?? 'Unknown error'}
                                 </span>
                               )}
                             </div>
                             {result.rows && result.columns && result.rows.length > 0 && (
-                              <div className="overflow-x-auto rounded-lg border border-white/[0.06]">
+                              <div className="overflow-x-auto rounded-lg border border-\[#e8ebe8\]">
                                 <table className="min-w-full text-xs">
-                                  <thead className="bg-white/[0.04]">
+                                  <thead className="bg-\[#f5f6f4\]">
                                     <tr>
                                       {result.columns.map((col) => (
                                         <th
                                           key={col.name}
-                                          className="px-3 py-2 text-left font-semibold text-[#475569] uppercase tracking-wider whitespace-nowrap"
+                                          className="px-3 py-2 text-left font-semibold text-\[#7b857f\] uppercase tracking-wider whitespace-nowrap"
                                         >
                                           {col.name}
                                         </th>
                                       ))}
                                     </tr>
                                   </thead>
-                                  <tbody className="divide-y divide-white/[0.05]">
+                                  <tbody className="divide-y divide-\[#e8ebe8\]">
                                     {result.rows.map((row, ri) => (
-                                      <tr key={ri} className="hover:bg-green-500/[0.06]">
+                                      <tr key={ri} className="hover:bg-\[#f5f6f4\]">
                                         {result.columns!.map((col) => (
-                                          <td key={col.name} className="px-3 py-2 text-[#94a3b8] whitespace-nowrap">
+                                          <td key={col.name} className="px-3 py-2 text-\[#7b857f\] whitespace-nowrap">
                                             {String(row[col.name] ?? '—')}
                                           </td>
                                         ))}
@@ -206,7 +206,7 @@ export function BoardsPage() {
                               </div>
                             )}
                             {result.status === 'ok' && (!result.rows || result.rows.length === 0) && (
-                              <p className="text-xs text-[#475569]">No rows returned</p>
+                              <p className="text-xs text-\[#7b857f\]">No rows returned</p>
                             )}
                           </div>
                         )

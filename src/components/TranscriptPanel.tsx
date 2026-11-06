@@ -38,10 +38,10 @@ function formatTs(ts: string): string {
 
 function StatusBadge({ status }: { status: string }) {
   const map: Record<string, { cls: string; icon: React.ReactNode }> = {
-    connected:    { cls: 'bg-green-100 text-green-700 border-green-200',   icon: <CheckCircle2 size={11} /> },
+    connected:    { cls: 'bg-green-100 text-\[#1f6b47\] border-green-200',   icon: <CheckCircle2 size={11} /> },
     disconnected: { cls: 'bg-gray-100 text-gray-600 border-gray-200',      icon: <XCircle size={11} /> },
     failed:       { cls: 'bg-red-100 text-red-600 border-red-200',         icon: <XCircle size={11} /> },
-    success:      { cls: 'bg-green-100 text-green-700 border-green-200',   icon: <CheckCircle2 size={11} /> },
+    success:      { cls: 'bg-green-100 text-\[#1f6b47\] border-green-200',   icon: <CheckCircle2 size={11} /> },
     incomplete:   { cls: 'bg-yellow-100 text-yellow-700 border-yellow-200',icon: <AlertCircle size={11} /> },
   }
   const style = map[status?.toLowerCase()] ?? { cls: 'bg-gray-100 text-gray-600 border-gray-200', icon: null }
@@ -54,9 +54,9 @@ function StatusBadge({ status }: { status: string }) {
 
 function MetaRow({ label, value }: { label: string; value: React.ReactNode }) {
   return (
-    <div className="flex items-center justify-between py-2 border-b border-white/[0.06] last:border-0">
-      <span className="text-xs text-[#475569]">{label}</span>
-      <span className="text-xs font-medium text-[#f1f5f9]">{value ?? '—'}</span>
+    <div className="flex items-center justify-between py-2 border-b border-\[#e8ebe8\] last:border-0">
+      <span className="text-xs text-\[#7b857f\]">{label}</span>
+      <span className="text-xs font-medium text-\[#0f1a14\]">{value ?? '—'}</span>
     </div>
   )
 }
@@ -77,11 +77,11 @@ function RecordingPlayer({ interactionId }: { interactionId: string }) {
 
   if (isLoading) {
     return (
-      <div className="flex items-center gap-3 py-3 px-4 bg-[#222538] border border-white/[0.06] rounded-xl">
-        <Loader2 className="animate-spin text-green-400 flex-shrink-0" size={16} />
+      <div className="flex items-center gap-3 py-3 px-4 bg-\[#f5f6f4\] border border-\[#e8ebe8\] rounded-\[16px\]">
+        <Loader2 className="animate-spin text-\[#1f6b47\] flex-shrink-0" size={16} />
         <div>
-          <p className="text-xs font-semibold text-[#f1f5f9]">Loading recording…</p>
-          <p className="text-[10px] text-[#475569] mt-0.5">Fetching audio from Sarvam</p>
+          <p className="text-xs font-semibold text-\[#0f1a14\]">Loading recording…</p>
+          <p className="text-[10px] text-\[#7b857f\] mt-0.5">Fetching audio from Sarvam</p>
         </div>
       </div>
     )
@@ -91,14 +91,14 @@ function RecordingPlayer({ interactionId }: { interactionId: string }) {
     const msg = error instanceof Error ? error.message : 'No recording available'
     const isNoRecording = msg === 'NO_RECORDING' || msg.includes('404') || msg.includes('No recording')
     return (
-      <div className="flex items-center gap-3 py-3 px-4 bg-[#222538] border border-white/[0.06] rounded-xl">
-        <Volume2 size={15} className={isNoRecording ? 'text-[#475569]' : 'text-red-400'} />
+      <div className="flex items-center gap-3 py-3 px-4 bg-\[#f5f6f4\] border border-\[#e8ebe8\] rounded-\[16px\]">
+        <Volume2 size={15} className={isNoRecording ? 'text-\[#7b857f\]' : 'text-\[#d9534f\]'} />
         <div>
-          <p className={`text-xs font-medium ${isNoRecording ? 'text-[#475569]' : 'text-red-400'}`}>
+          <p className={`text-xs font-medium ${isNoRecording ? 'text-\[#7b857f\]' : 'text-\[#d9534f\]'}`}>
             {isNoRecording ? 'No recording for this call' : 'Failed to load recording'}
           </p>
           {!isNoRecording && (
-            <p className="text-[10px] text-red-400 mt-0.5">{msg}</p>
+            <p className="text-[10px] text-\[#d9534f\] mt-0.5">{msg}</p>
           )}
         </div>
       </div>
@@ -106,20 +106,20 @@ function RecordingPlayer({ interactionId }: { interactionId: string }) {
   }
 
   return (
-    <div className="bg-[#222538] border border-white/[0.06] rounded-xl overflow-hidden">
+    <div className="bg-\[#f5f6f4\] border border-\[#e8ebe8\] rounded-\[16px\] overflow-hidden">
       {/* Header row */}
       <div className="flex items-center gap-3 px-4 py-3">
         <button
           onClick={toggle}
-          className="w-9 h-9 rounded-full bg-green-500 hover:bg-green-600 flex items-center justify-center text-white flex-shrink-0 shadow-sm transition-colors"
+          className="w-9 h-9 rounded-full bg-\[#a6e22e\] hover:bg-\[#1f6b47\] flex items-center justify-center text-white flex-shrink-0 shadow-sm transition-colors"
         >
           {isPlaying ? <Pause size={16} /> : <Play size={16} className="ml-0.5" />}
         </button>
         <div className="flex-1 min-w-0">
-          <p className="text-xs font-semibold text-[#f1f5f9]">Call Recording</p>
-          <p className="text-[10px] text-[#475569] mt-0.5">Dual-channel WAV · User (left ch.) · Agent (right ch.)</p>
+          <p className="text-xs font-semibold text-\[#0f1a14\]">Call Recording</p>
+          <p className="text-[10px] text-\[#7b857f\] mt-0.5">Dual-channel WAV · User (left ch.) · Agent (right ch.)</p>
         </div>
-        <Volume2 size={14} className="text-[#475569] flex-shrink-0" />
+        <Volume2 size={14} className="text-\[#7b857f\] flex-shrink-0" />
       </div>
       {/* Full native audio controls */}
       <div className="px-4 pb-3">
@@ -141,7 +141,7 @@ function RecordingPlayer({ interactionId }: { interactionId: string }) {
 // ── Transcript messages ───────────────────────────────────────────────────────
 function TranscriptView({ messages }: { messages: Array<{ role: string; content: string }> }) {
   if (messages.length === 0) {
-    return <p className="text-[#475569] text-sm text-center py-6">No transcript available</p>
+    return <p className="text-\[#7b857f\] text-sm text-center py-6">No transcript available</p>
   }
   return (
     <div className="space-y-3">
@@ -155,16 +155,16 @@ function TranscriptView({ messages }: { messages: Array<{ role: string; content:
             }`}>
               {isUser
                 ? <User size={13} className="text-blue-400" />
-                : <Bot size={13} className="text-green-400" />
+                : <Bot size={13} className="text-\[#1f6b47\]" />
               }
             </div>
             {/* Bubble */}
             <div className={`flex flex-col gap-0.5 ${isUser ? 'items-end' : 'items-start'}`}>
-              <span className="text-[#475569] text-[10px] px-1 capitalize">{msg.role}</span>
+              <span className="text-\[#7b857f\] text-[10px] px-1 capitalize">{msg.role}</span>
               <div className={
                 isUser
-                  ? 'bg-blue-600 text-white rounded-xl px-3 py-2 text-sm max-w-[75%] ml-auto'
-                  : 'bg-[#222538] text-[#f1f5f9] border border-white/[0.06] rounded-xl px-3 py-2 text-sm max-w-[75%]'
+                  ? 'bg-blue-600 text-white rounded-\[16px\] px-3 py-2 text-sm max-w-[75%] ml-auto'
+                  : 'bg-\[#f5f6f4\] text-\[#0f1a14\] border border-\[#e8ebe8\] rounded-\[16px\] px-3 py-2 text-sm max-w-[75%]'
               }>
                 {msg.content}
               </div>
@@ -195,10 +195,10 @@ function LogAnalyser({ trace, callStart, agentVars }: {
   return (
     <div className="space-y-5">
       {/* Config at start — Conversation Initiated */}
-      <div className="rounded-xl border border-white/[0.06] overflow-hidden">
-        <div className="flex items-center gap-2 px-4 py-2.5 bg-[#222538] border-b border-white/[0.06]">
-          <Phone size={13} className="text-green-400" />
-          <span className="text-xs font-semibold text-[#f1f5f9] uppercase tracking-wide">Conversation Initiated</span>
+      <div className="rounded-\[16px\] border border-\[#e8ebe8\] overflow-hidden">
+        <div className="flex items-center gap-2 px-4 py-2.5 bg-\[#f5f6f4\] border-b border-\[#e8ebe8\]">
+          <Phone size={13} className="text-\[#1f6b47\]" />
+          <span className="text-xs font-semibold text-\[#0f1a14\] uppercase tracking-wide">Conversation Initiated</span>
         </div>
         <div className="px-4 py-3 space-y-0">
           {trace.lifecycle_events?.filter(e =>
@@ -219,47 +219,47 @@ function LogAnalyser({ trace, callStart, agentVars }: {
       {/* Per-turn breakdown */}
       {trace.turns?.length > 0 && (
         <div className="space-y-2">
-          <h4 className="text-xs font-semibold text-[#475569] uppercase tracking-widest px-1">Turns</h4>
+          <h4 className="text-xs font-semibold text-\[#7b857f\] uppercase tracking-widest px-1">Turns</h4>
           {trace.turns.map((turn, idx) => {
             const isOpen = openTurns.has(idx)
             return (
-              <div key={idx} className="rounded-xl border border-white/[0.06] overflow-hidden shadow-sm">
+              <div key={idx} className="rounded-\[16px\] border border-\[#e8ebe8\] overflow-hidden shadow-sm">
                 {/* Turn header — clickable */}
                 <button
-                  className="w-full flex items-center justify-between px-4 py-2.5 bg-[#222538] hover:bg-[#2a2d42] transition-colors text-left"
+                  className="w-full flex items-center justify-between px-4 py-2.5 bg-\[#f5f6f4\] hover:bg-[#2a2d42] transition-colors text-left"
                   onClick={() => toggle(idx)}
                 >
                   <div className="flex items-center gap-3">
-                    <span className="text-xs font-semibold text-[#f1f5f9]">Turn {idx + 1}</span>
+                    <span className="text-xs font-semibold text-\[#0f1a14\]">Turn {idx + 1}</span>
                     {turn.user_text && (
-                      <span className="text-xs text-[#475569] truncate max-w-[180px]">"{turn.user_text}"</span>
+                      <span className="text-xs text-\[#7b857f\] truncate max-w-[180px]">"{turn.user_text}"</span>
                     )}
                   </div>
                   <div className="flex items-center gap-4">
                     {/* Latency badges */}
                     <div className="flex gap-2">
                       {turn.asr_latency_ms != null && (
-                        <span className="flex items-center gap-1 text-[10px] text-[#475569] bg-[#1a1d2e] border border-white/[0.06] rounded-full px-2 py-0.5">
+                        <span className="flex items-center gap-1 text-[10px] text-\[#7b857f\] bg-white border border-\[#e8ebe8\] rounded-full px-2 py-0.5">
                           <Mic size={9} className="text-blue-400" /> {turn.asr_latency_ms}ms
                         </span>
                       )}
                       {turn.llm_latency_ms != null && (
-                        <span className="flex items-center gap-1 text-[10px] text-[#475569] bg-[#1a1d2e] border border-white/[0.06] rounded-full px-2 py-0.5">
+                        <span className="flex items-center gap-1 text-[10px] text-\[#7b857f\] bg-white border border-\[#e8ebe8\] rounded-full px-2 py-0.5">
                           <Bot size={9} className="text-purple-400" /> {turn.llm_latency_ms}ms
                         </span>
                       )}
                       {turn.tts_latency_ms != null && (
-                        <span className="flex items-center gap-1 text-[10px] text-[#475569] bg-[#1a1d2e] border border-white/[0.06] rounded-full px-2 py-0.5">
-                          <Volume2 size={9} className="text-green-400" /> {turn.tts_latency_ms}ms
+                        <span className="flex items-center gap-1 text-[10px] text-\[#7b857f\] bg-white border border-\[#e8ebe8\] rounded-full px-2 py-0.5">
+                          <Volume2 size={9} className="text-\[#1f6b47\]" /> {turn.tts_latency_ms}ms
                         </span>
                       )}
                     </div>
-                    {isOpen ? <ChevronUp size={14} className="text-[#475569]" /> : <ChevronDown size={14} className="text-[#475569]" />}
+                    {isOpen ? <ChevronUp size={14} className="text-\[#7b857f\]" /> : <ChevronDown size={14} className="text-\[#7b857f\]" />}
                   </div>
                 </button>
 
                 {isOpen && (
-                  <div className="px-4 py-3 space-y-3 bg-[#1a1d2e]">
+                  <div className="px-4 py-3 space-y-3 bg-white">
                     {/* User transcript */}
                     {turn.user_text && (
                       <div className="flex gap-3">
@@ -268,7 +268,7 @@ function LogAnalyser({ trace, callStart, agentVars }: {
                         </div>
                         <div>
                           <p className="text-[10px] text-blue-400 font-semibold mb-0.5">User (ASR)</p>
-                          <p className="text-xs text-[#94a3b8] leading-relaxed">{turn.user_text}</p>
+                          <p className="text-xs text-\[#7b857f\] leading-relaxed">{turn.user_text}</p>
                         </div>
                       </div>
                     )}
@@ -276,25 +276,25 @@ function LogAnalyser({ trace, callStart, agentVars }: {
                     {turn.assistant_text && (
                       <div className="flex gap-3">
                         <div className="w-5 h-5 rounded-full bg-green-900 flex items-center justify-center flex-shrink-0 mt-0.5">
-                          <Bot size={10} className="text-green-400" />
+                          <Bot size={10} className="text-\[#1f6b47\]" />
                         </div>
                         <div>
-                          <p className="text-[10px] text-green-400 font-semibold mb-0.5">Agent (LLM → TTS)</p>
-                          <p className="text-xs text-[#94a3b8] leading-relaxed">{turn.assistant_text}</p>
+                          <p className="text-[10px] text-\[#1f6b47\] font-semibold mb-0.5">Agent (LLM → TTS)</p>
+                          <p className="text-xs text-\[#7b857f\] leading-relaxed">{turn.assistant_text}</p>
                         </div>
                       </div>
                     )}
                     {/* Tool calls */}
                     {turn.events && turn.events.length > 0 && (
-                      <div className="space-y-1.5 pt-1 border-t border-white/[0.06]">
+                      <div className="space-y-1.5 pt-1 border-t border-\[#e8ebe8\]">
                         <p className="text-[10px] text-orange-400 font-semibold uppercase tracking-wide">Tool Calls</p>
                         {turn.events.map((ev, ei) => (
-                          <div key={ei} className="flex items-start gap-2 bg-[#222538] border border-white/[0.06] rounded-lg px-3 py-2">
+                          <div key={ei} className="flex items-start gap-2 bg-\[#f5f6f4\] border border-\[#e8ebe8\] rounded-lg px-3 py-2">
                             <Wrench size={11} className="text-orange-400 mt-0.5 flex-shrink-0" />
                             <div className="min-w-0">
                               <span className="text-[10px] font-mono font-semibold text-orange-400">{ev.event}</span>
                               {ev.data && (
-                                <p className="text-[10px] text-[#475569] mt-0.5 break-all">
+                                <p className="text-[10px] text-\[#7b857f\] mt-0.5 break-all">
                                   {JSON.stringify(ev.data).slice(0, 120)}
                                   {JSON.stringify(ev.data).length > 120 ? '…' : ''}
                                 </p>
@@ -313,10 +313,10 @@ function LogAnalyser({ trace, callStart, agentVars }: {
       )}
 
       {/* Conversation Ended */}
-      <div className="rounded-xl border border-white/[0.06] overflow-hidden">
-        <div className="flex items-center gap-2 px-4 py-2.5 bg-[#222538] border-b border-white/[0.06]">
-          <PhoneOff size={13} className="text-red-400" />
-          <span className="text-xs font-semibold text-red-400 uppercase tracking-wide">Conversation Ended</span>
+      <div className="rounded-\[16px\] border border-\[#e8ebe8\] overflow-hidden">
+        <div className="flex items-center gap-2 px-4 py-2.5 bg-\[#f5f6f4\] border-b border-\[#e8ebe8\]">
+          <PhoneOff size={13} className="text-\[#d9534f\]" />
+          <span className="text-xs font-semibold text-\[#d9534f\] uppercase tracking-wide">Conversation Ended</span>
         </div>
         <div className="px-4 py-3">
           {trace.lifecycle_events?.filter(e =>
@@ -334,15 +334,15 @@ function LogAnalyser({ trace, callStart, agentVars }: {
 
       {/* Agent Variables at end of call */}
       {agentVars && Object.keys(agentVars).length > 0 && (
-        <div className="rounded-xl border border-white/[0.06] overflow-hidden">
-          <div className="flex items-center gap-2 px-4 py-2.5 bg-[#222538] border-b border-white/[0.06]">
+        <div className="rounded-\[16px\] border border-\[#e8ebe8\] overflow-hidden">
+          <div className="flex items-center gap-2 px-4 py-2.5 bg-\[#f5f6f4\] border-b border-\[#e8ebe8\]">
             <Wrench size={13} className="text-purple-400" />
             <span className="text-xs font-semibold text-purple-400 uppercase tracking-wide">End State Variables</span>
           </div>
           <div className="px-4 py-3 space-y-0">
             {Object.entries(agentVars).map(([key, val]) => (
               <MetaRow key={key} label={key} value={
-                <span className="font-mono text-[11px] text-purple-400 bg-[#222538] px-1.5 py-0.5 rounded border border-white/[0.06]">
+                <span className="font-mono text-[11px] text-purple-400 bg-\[#f5f6f4\] px-1.5 py-0.5 rounded border border-\[#e8ebe8\]">
                   {typeof val === 'object' ? JSON.stringify(val) : String(val)}
                 </span>
               } />
@@ -417,41 +417,41 @@ export function TranscriptPanel({ interaction, onClose, initialTab }: Props) {
       <div className="fixed inset-0 bg-black/60 z-40 backdrop-blur-sm" onClick={onClose} />
 
       {/* Panel */}
-      <div className="fixed right-0 top-0 h-full w-full max-w-[680px] bg-[#1a1d2e] border-l border-white/[0.06] z-50 flex flex-col shadow-2xl">
+      <div className="fixed right-0 top-0 h-full w-full max-w-[680px] bg-white border-l border-\[#e8ebe8\] z-50 flex flex-col shadow-2xl">
 
         {/* ── Header ── */}
-        <div className="border-b border-white/[0.06] px-5 py-4 flex items-center justify-between">
+        <div className="border-b border-\[#e8ebe8\] px-5 py-4 flex items-center justify-between">
           <div className="flex items-start gap-3">
             <div className="w-9 h-9 rounded-full bg-green-900 flex items-center justify-center flex-shrink-0">
-              <Phone size={15} className="text-green-400" />
+              <Phone size={15} className="text-\[#1f6b47\]" />
             </div>
             <div>
-              <p className="text-[#f1f5f9] font-semibold text-sm">Call Details</p>
-              <p className="text-[11px] font-mono text-[#475569] mt-0.5 select-all">{interaction.interaction_id}</p>
+              <p className="text-\[#0f1a14\] font-semibold text-sm">Call Details</p>
+              <p className="text-[11px] font-mono text-\[#7b857f\] mt-0.5 select-all">{interaction.interaction_id}</p>
             </div>
           </div>
-          <button onClick={onClose} className="p-1.5 rounded-lg text-[#475569] hover:text-[#f1f5f9] mt-0.5 transition-colors">
+          <button onClick={onClose} className="p-1.5 rounded-lg text-\[#7b857f\] hover:text-\[#0f1a14\] mt-0.5 transition-colors">
             <X size={17} />
           </button>
         </div>
 
         {/* ── Quick meta strip ── */}
-        <div className="flex items-center gap-4 px-5 py-2.5 bg-[#222538] border-b border-white/[0.06] flex-wrap">
+        <div className="flex items-center gap-4 px-5 py-2.5 bg-\[#f5f6f4\] border-b border-\[#e8ebe8\] flex-wrap">
           {interaction.user_contact_masked && (
-            <span className="flex items-center gap-1.5 text-xs text-[#94a3b8]">
-              <User size={11} className="text-[#475569]" />
+            <span className="flex items-center gap-1.5 text-xs text-\[#7b857f\]">
+              <User size={11} className="text-\[#7b857f\]" />
               {interaction.user_contact_masked}
             </span>
           )}
           {interaction.duration_in_seconds != null && (
-            <span className="flex items-center gap-1.5 text-xs text-[#94a3b8]">
-              <Clock size={11} className="text-[#475569]" />
+            <span className="flex items-center gap-1.5 text-xs text-\[#7b857f\]">
+              <Clock size={11} className="text-\[#7b857f\]" />
               {Math.floor(interaction.duration_in_seconds / 60)}m {interaction.duration_in_seconds % 60}s
             </span>
           )}
           {interaction.language_name && (
-            <span className="flex items-center gap-1.5 text-xs text-[#94a3b8]">
-              <MessageSquare size={11} className="text-[#475569]" />
+            <span className="flex items-center gap-1.5 text-xs text-\[#7b857f\]">
+              <MessageSquare size={11} className="text-\[#7b857f\]" />
               {interaction.language_name}
             </span>
           )}
@@ -464,15 +464,15 @@ export function TranscriptPanel({ interaction, onClose, initialTab }: Props) {
         </div>
 
         {/* ── Tabs ── */}
-        <div className="flex border-b border-white/[0.06] px-2">
+        <div className="flex border-b border-\[#e8ebe8\] px-2">
           {tabs.map(t => (
             <button
               key={t.id}
               onClick={() => setTab(t.id)}
               className={`flex items-center gap-1.5 transition-colors ${
                 tab === t.id
-                  ? 'text-green-400 text-[13px] px-4 py-2.5 border-b-2 border-green-500'
-                  : 'text-[#475569] text-[13px] px-4 py-2.5 border-b-2 border-transparent hover:text-[#94a3b8]'
+                  ? 'text-\[#1f6b47\] text-[13px] px-4 py-2.5 border-b-2 border-green-500'
+                  : 'text-\[#7b857f\] text-[13px] px-4 py-2.5 border-b-2 border-transparent hover:text-\[#7b857f\]'
               }`}
             >
               {t.icon}{t.label}
@@ -489,10 +489,10 @@ export function TranscriptPanel({ interaction, onClose, initialTab }: Props) {
               {summary && <CallSummary summary={summary} />}
 
               {/* Call metadata card */}
-              <div className="rounded-xl border border-white/[0.06] overflow-hidden">
-                <div className="flex items-center gap-2 px-4 py-2.5 bg-[#222538] border-b border-white/[0.06]">
-                  <Info size={13} className="text-[#475569]" />
-                  <span className="text-xs font-semibold text-[#94a3b8] uppercase tracking-wide">Call Metadata</span>
+              <div className="rounded-\[16px\] border border-\[#e8ebe8\] overflow-hidden">
+                <div className="flex items-center gap-2 px-4 py-2.5 bg-\[#f5f6f4\] border-b border-\[#e8ebe8\]">
+                  <Info size={13} className="text-\[#7b857f\]" />
+                  <span className="text-xs font-semibold text-\[#7b857f\] uppercase tracking-wide">Call Metadata</span>
                 </div>
                 <div className="px-4 py-3 space-y-0">
                   <MetaRow label="Interaction ID"    value={<span className="font-mono text-[10px]">{interaction.interaction_id}</span>} />
@@ -510,10 +510,10 @@ export function TranscriptPanel({ interaction, onClose, initialTab }: Props) {
               </div>
 
               {/* Recording player */}
-              <div className="rounded-xl border border-white/[0.06] overflow-hidden">
-                <div className="flex items-center gap-2 px-4 py-2.5 bg-[#222538] border-b border-white/[0.06]">
-                  <Volume2 size={13} className="text-[#475569]" />
-                  <span className="text-xs font-semibold text-[#94a3b8] uppercase tracking-wide">Recording</span>
+              <div className="rounded-\[16px\] border border-\[#e8ebe8\] overflow-hidden">
+                <div className="flex items-center gap-2 px-4 py-2.5 bg-\[#f5f6f4\] border-b border-\[#e8ebe8\]">
+                  <Volume2 size={13} className="text-\[#7b857f\]" />
+                  <span className="text-xs font-semibold text-\[#7b857f\] uppercase tracking-wide">Recording</span>
                 </div>
                 <div className="p-4">
                   <RecordingPlayer interactionId={interaction.interaction_id} />
@@ -528,14 +528,14 @@ export function TranscriptPanel({ interaction, onClose, initialTab }: Props) {
               <div className="flex-1 p-5">
                 {tLoading && (
                   <div className="flex flex-col items-center justify-center py-12 gap-3">
-                    <Loader2 className="animate-spin text-green-400" size={24} />
-                    <p className="text-[#475569] text-sm">Loading transcript…</p>
+                    <Loader2 className="animate-spin text-\[#1f6b47\]" size={24} />
+                    <p className="text-\[#7b857f\] text-sm">Loading transcript…</p>
                   </div>
                 )}
                 {tError && (
-                  <div className="flex items-center gap-2 bg-[#222538] border border-white/[0.06] rounded-xl px-4 py-3">
-                    <XCircle size={15} className="text-red-400" />
-                    <p className="text-red-400 text-sm">Failed to load transcript</p>
+                  <div className="flex items-center gap-2 bg-\[#f5f6f4\] border border-\[#e8ebe8\] rounded-\[16px\] px-4 py-3">
+                    <XCircle size={15} className="text-\[#d9534f\]" />
+                    <p className="text-\[#d9534f\] text-sm">Failed to load transcript</p>
                   </div>
                 )}
                 {!tLoading && !tError && (
@@ -545,7 +545,7 @@ export function TranscriptPanel({ interaction, onClose, initialTab }: Props) {
               </div>
 
               {/* ── Recording player pinned at bottom of transcript (exactly like Sarvam) ── */}
-              <div className="border-t border-white/[0.06] p-4 bg-[#1a1d2e] flex-shrink-0">
+              <div className="border-t border-\[#e8ebe8\] p-4 bg-white flex-shrink-0">
                 <RecordingPlayer interactionId={interaction.interaction_id} />
               </div>
             </div>
@@ -556,15 +556,15 @@ export function TranscriptPanel({ interaction, onClose, initialTab }: Props) {
             <div className="p-5">
               {trLoading && (
                 <div className="flex flex-col items-center justify-center py-12 gap-3">
-                  <Loader2 className="animate-spin text-green-400" size={24} />
-                  <p className="text-[#475569] text-sm">Loading trace…</p>
+                  <Loader2 className="animate-spin text-\[#1f6b47\]" size={24} />
+                  <p className="text-\[#7b857f\] text-sm">Loading trace…</p>
                 </div>
               )}
               {!trLoading && !trace && (
                 <div className="flex flex-col items-center justify-center py-12 gap-2 text-center">
-                  <Activity size={32} className="text-[#475569]" />
-                  <p className="text-[#475569] text-sm">No trace data available</p>
-                  <p className="text-[10px] text-[#475569]">Trace is only available for recent calls</p>
+                  <Activity size={32} className="text-\[#7b857f\]" />
+                  <p className="text-\[#7b857f\] text-sm">No trace data available</p>
+                  <p className="text-[10px] text-\[#7b857f\]">Trace is only available for recent calls</p>
                 </div>
               )}
               {trace && (
